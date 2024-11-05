@@ -5,11 +5,12 @@ import { DataTable } from "@/components/data-table";
 import { columns } from "@/components/columns";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Users, GraduationCap, Search } from "lucide-react";
+import { UserPlus, Users, Search } from "lucide-react";
 import { AddLeadDialog } from "@/components/add-lead-dialog";
 import { StatusCard } from "@/components/status-card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Image from "next/image";
 
 export default function Dashboard() {
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
@@ -30,7 +31,15 @@ export default function Dashboard() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-3">
-              <GraduationCap className="h-8 w-8 text-primary" />
+              <div className="relative w-10 h-10">
+                <Image
+                  src="/bsol-logo.png"
+                  alt="BSOL Logo"
+                  width={40}
+                  height={40}
+                  priority
+                />
+              </div>
               <div>
                 <h1 className="text-2xl font-bold text-primary">BSOL Admission Team</h1>
                 <p className="text-sm text-muted-foreground">Manage your admission pipeline</p>
