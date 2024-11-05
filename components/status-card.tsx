@@ -11,7 +11,7 @@ interface StatusCardProps {
 
 export function StatusCard({ label, count, color }: StatusCardProps) {
   return (
-    <Card>
+    <Card className="hover:shadow-lg transition-shadow duration-200">
       <CardContent className="p-6">
         <div className="flex items-center gap-4">
           <div className={cn("w-3 h-3 rounded-full", color)} />
