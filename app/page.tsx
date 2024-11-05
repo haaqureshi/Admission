@@ -26,7 +26,7 @@ export default function Dashboard() {
     <div className="container mx-auto py-10">
       <div className="flex justify-between items-center mb-8">
         <div className="space-y-0.5">
-          <h2 className="text-2xl font-bold tracking-tight">Admission Dashboard</h2>
+          <h2 className="text-2xl font-bold tracking-tight">BSOL Admission Team</h2>
           <p className="text-muted-foreground">
             Manage and track your admission leads effectively
           </p>
