@@ -83,13 +83,13 @@ export const columns: ColumnDef<Lead>[] = [
     header: "Status",
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
-      const getStatusColor = (status: string): "secondary" | "warning" | "success" | "default" | "destructive" => {
-        const colors: Record<string, "secondary" | "warning" | "success" | "default" | "destructive"> = {
+      const getStatusColor = (status: string): "secondary" | "destructive" | "default" | "outline" => {
+        const colors: Record<string, "secondary" | "destructive" | "default" | "outline"> = {
           "No Contact": "secondary",
-          "Thinking": "warning",
-          "Interested": "success",
+          "Thinking": "outline",
+          "Interested": "secondary",
           "Next Session": "default",
-          "Won": "success",
+          "Won": "secondary",
           "Not Interested": "destructive",
           "Not Affordable": "default",
         };
