@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { DataTable } from "@/components/data-table";
 import { columns } from "@/components/columns";
 import { Card } from "@/components/ui/card";
@@ -10,54 +10,21 @@ import { AddLeadDialog } from "@/components/add-lead-dialog";
 import { StatusCard } from "@/components/status-card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
-import { supabase } from "@/lib/supabase";
-import { Lead } from "@/components/columns";
-import { useToast } from "@/components/ui/use-toast";
 
 export default function Dashboard() {
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchLeads();
-  }, []);
-
-  const fetchLeads = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('leads')
-        .select('*');
-
-      if (error) throw error;
-
-      setLeads(data || []);
-      
-      // Calculate status counts
-      const counts = (data || []).reduce((acc: Record<string, number>, lead) => {
-        acc[lead.status] = (acc[lead.status] || 0) + 1;
-        return acc;
-      }, {});
-      setStatusCounts(counts);
-    } catch (error) {
-      toast({
-        title: "Error fetching leads",
-        description: "Please try again later",
-        variant: "destructive",
-      });
-    }
-  };
-
   const statusData = [
-    { label: "No Contact", count: statusCounts["No Contact"] || 0, color: "bg-gray-500" },
-    { label: "Thinking", count: statusCounts["Thinking"] || 0, color: "bg-yellow-500" },
-    { label: "Interested", count: statusCounts["Interested"] || 0, color: "bg-green-500" },
-    { label: "Next Session", count: statusCounts["Next Session"] || 0, color: "bg-blue-500" },
-    { label: "Won", count: statusCounts["Won"] || 0, color: "bg-emerald-500" },
-    { label: "Not Interested", count: statusCounts["Not Interested"] || 0, color: "bg-red-500" },
-    { label: "Not Affordable", count: statusCounts["Not Affordable"] || 0, color: "bg-purple-500" },
+    { label: "No Contact", count: 45, color: "bg-gray-500" },
+    { label: "Thinking", count: 28, color: "bg-yellow-500" },
+    { label: "Interested", count: 32, color: "bg-green-500" },
+    { label: "Next Session", count: 15, color: "bg-blue-500" },
+    { label: "Won", count: 20, color: "bg-emerald-500" },
+    { label: "Not Interested", count: 12, color: "bg-red-500" },
+    { label: "Not Affordable", count: 8, color: "bg-purple-500" },
   ];
 
   return (
@@ -127,41 +94,31 @@ export default function Dashboard() {
                   </p>
                 </div>
               </div>
-              <DataTable columns={columns} data={leads} onLeadUpdate={fetchLeads} />
+              <DataTable columns={columns} data={[]} />
             </Card>
           </TabsContent>
 
           <TabsContent value="today">
             <Card className="p-6">
-              <DataTable columns={columns} data={leads.filter(lead => 
-                new Date(lead.created_at).toDateString() === new Date().toDateString()
-              )} onLeadUpdate={fetchLeads} />
+              <DataTable columns={columns} data={[]} />
             </Card>
           </TabsContent>
 
           <TabsContent value="pending">
             <Card className="p-6">
-              <DataTable columns={columns} data={leads.filter(lead => 
-                ["No Contact", "Thinking", "Interested"].includes(lead.status)
-              )} onLeadUpdate={fetchLeads} />
+              <DataTable columns={columns} data={[]} />
             </Card>
           </TabsContent>
 
           <TabsContent value="converted">
             <Card className="p-6">
-              <DataTable columns={columns} data={leads.filter(lead => 
-                lead.status === "Won"
-              )} onLeadUpdate={fetchLeads} />
+              <DataTable columns={columns} data={[]} />
             </Card>
           </TabsContent>
         </Tabs>
       </main>
 
-      <AddLeadDialog 
-        open={isAddLeadOpen} 
-        onOpenChange={setIsAddLeadOpen} 
-        onLeadAdded={fetchLeads}
-      />
+      <AddLeadDialog open={isAddLeadOpen} onOpenChange={setIsAddLeadOpen} />
     </div>
   );
 }
