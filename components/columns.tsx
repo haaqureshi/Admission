@@ -23,6 +23,7 @@ export type Lead = {
   source: string;
   program: string;
   status: string;
+  "Assign To": string;
 };
 
 export const columns: ColumnDef<Lead>[] = [
@@ -80,9 +81,71 @@ export const columns: ColumnDef<Lead>[] = [
     ),
   },
   {
+    accessorKey: "Assign To",
+    header: "Assigned To",
+    cell: ({ row, table }) => {
+      const lead = row.original;
+      const meta = table.options.meta as { 
+        updateStatus: (id: string, status: string) => Promise<void>;
+        updateAssignee?: (id: string, assignTo: string) => Promise<void>;
+      };
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 px-2">
+              <Badge variant="outline" className="cursor-pointer">
+                {lead["Assign To"] || "Unassigned"}
+              </Badge>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem 
+              onClick={() => meta.updateAssignee?.(lead.id, "Abubakr Mahmood")}
+            >
+              Abubakr Mahmood
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => meta.updateAssignee?.(lead.id, "Alvina Sami")}
+            >
+              Alvina Sami
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => meta.updateAssignee?.(lead.id, "Shahzaib Shams")}
+            >
+              Shahzaib Shams
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => meta.updateAssignee?.(lead.id, "Faiza Ullah")}
+            >
+              Faiza Ullah
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => meta.updateAssignee?.(lead.id, "Aneeza Komal")}
+            >
+              Aneeza Komal
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
+    filterFn: (row, id, value) => {
+      return value === "all" || row.getValue(id) === value;
+    },
+  },
+  {
     accessorKey: "status",
     header: "Status",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
+      const lead = row.original;
+      const meta = table.options.meta as { updateStatus: (id: string, status: string) => Promise<void> };
+
+      const handleStatusUpdate = async (status: string) => {
+        if (meta?.updateStatus) {
+          await meta.updateStatus(lead.id, status);
+        }
+      };
+
       const status = row.getValue("status") as string;
       const getStatusColor = (status: string): "secondary" | "destructive" | "default" | "outline" => {
         const colors: Record<string, "secondary" | "destructive" | "default" | "outline"> = {
@@ -106,6 +169,12 @@ export const columns: ColumnDef<Lead>[] = [
       const lead = row.original;
       const meta = table.options.meta as { updateStatus: (id: string, status: string) => Promise<void> };
 
+      const handleStatusUpdate = async (status: string) => {
+        if (meta?.updateStatus) {
+          await meta.updateStatus(lead.id, status);
+        }
+      };
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -114,25 +183,25 @@ export const columns: ColumnDef<Lead>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => meta.updateStatus(lead.id, "No Contact")}>
+            <DropdownMenuItem onClick={() => handleStatusUpdate("No Contact")}>
               Set as No Contact
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => meta.updateStatus(lead.id, "Thinking")}>
+            <DropdownMenuItem onClick={() => handleStatusUpdate("Thinking")}>
               Set as Thinking
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => meta.updateStatus(lead.id, "Interested")}>
+            <DropdownMenuItem onClick={() => handleStatusUpdate("Interested")}>
               Set as Interested
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => meta.updateStatus(lead.id, "Next Session")}>
+            <DropdownMenuItem onClick={() => handleStatusUpdate("Next Session")}>
               Set as Next Session
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => meta.updateStatus(lead.id, "Won")}>
+            <DropdownMenuItem onClick={() => handleStatusUpdate("Won")}>
               Set as Won
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => meta.updateStatus(lead.id, "Not Interested")}>
+            <DropdownMenuItem onClick={() => handleStatusUpdate("Not Interested")}>
               Set as Not Interested
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => meta.updateStatus(lead.id, "Not Affordable")}>
+            <DropdownMenuItem onClick={() => handleStatusUpdate("Not Affordable")}>
               Set as Not Affordable
             </DropdownMenuItem>
           </DropdownMenuContent>

@@ -10,7 +10,6 @@ import {
   SortingState,
   getFilteredRowModel,
   ColumnFiltersState,
-  TableOptions,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -34,7 +33,10 @@ import { useState } from "react";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  meta?: TableOptions<TData>['meta'];
+  meta?: {
+    updateStatus: (id: string, status: string) => Promise<void>;
+    updateAssignee?: (id: string, assignTo: string) => Promise<void>;
+  };
 }
 
 export function DataTable<TData, TValue>({
@@ -54,11 +56,11 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
-    meta,
     state: {
       sorting,
       columnFilters,
     },
+    meta,
   });
 
   return (

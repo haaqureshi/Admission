@@ -19,29 +19,39 @@ export default function Dashboard() {
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
   const [leads, setLeads] = useState<Lead[]>([]);
   const { toast } = useToast();
+  const [refreshKey, setRefreshKey] = useState(0); // Add refresh key state
 
   const fetchLeads = async () => {
-    const { data, error } = await supabase
-      .from('leads')
-      .select('*')
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('leads')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (error) {
+      if (error) {
+        throw error;
+      }
+
+      setLeads(data || []);
+    } catch (error) {
       toast({
         title: "Error",
         description: "Failed to fetch leads",
         variant: "destructive",
       });
-      return;
     }
+  };
 
-    setLeads(data || []);
+  // Refresh function that can be called to trigger a re-fetch
+  const refreshData = () => {
+    setRefreshKey(prev => prev + 1); // Increment refresh key to trigger useEffect
   };
 
   useEffect(() => {
     fetchLeads();
+  }, [refreshKey]); // Add refreshKey as dependency
 
-    // Set up real-time subscription
+  useEffect(() => {
     const channel = supabase
       .channel('leads_changes')
       .on('postgres_changes', 
@@ -51,7 +61,8 @@ export default function Dashboard() {
           table: 'leads' 
         }, 
         () => {
-          fetchLeads();
+          // Refresh data whenever any change occurs
+          refreshData();
         }
       )
       .subscribe();
@@ -62,26 +73,55 @@ export default function Dashboard() {
   }, []);
 
   const updateLeadStatus = async (id: string, status: string) => {
-    const { error } = await supabase
-      .from('leads')
-      .update({ status })
-      .eq('id', id);
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .update({ status })
+        .eq('id', id);
 
-    if (error) {
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Lead status updated successfully",
+      });
+      
+      refreshData(); // Refresh after update
+    } catch (error) {
       toast({
         title: "Error",
         description: "Failed to update lead status",
         variant: "destructive",
       });
-      return;
     }
+  };
 
-    toast({
-      title: "Success",
-      description: "Lead status updated successfully",
-    });
+  const updateLeadAssignee = async (id: string, assignTo: string) => {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .update({ "Assign To": assignTo })
+        .eq('id', id);
 
-    await fetchLeads();
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Lead assignee updated successfully",
+      });
+      
+      refreshData(); // Refresh after update
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update lead assignee",
+        variant: "destructive",
+      });
+    }
   };
 
   const statusData = [
@@ -165,7 +205,8 @@ export default function Dashboard() {
                 columns={columns} 
                 data={leads}
                 meta={{
-                  updateStatus: updateLeadStatus
+                  updateStatus: updateLeadStatus,
+                  updateAssignee: updateLeadAssignee
                 }}
               />
             </Card>
@@ -180,7 +221,8 @@ export default function Dashboard() {
                   return lead.created_at.startsWith(today);
                 })}
                 meta={{
-                  updateStatus: updateLeadStatus
+                  updateStatus: updateLeadStatus,
+                  updateAssignee: updateLeadAssignee
                 }}
               />
             </Card>
@@ -194,7 +236,8 @@ export default function Dashboard() {
                   ["No Contact", "Thinking", "Interested"].includes(lead.status)
                 )}
                 meta={{
-                  updateStatus: updateLeadStatus
+                  updateStatus: updateLeadStatus,
+                  updateAssignee: updateLeadAssignee
                 }}
               />
             </Card>
@@ -206,7 +249,8 @@ export default function Dashboard() {
                 columns={columns} 
                 data={leads.filter(lead => lead.status === "Won")}
                 meta={{
-                  updateStatus: updateLeadStatus
+                  updateStatus: updateLeadStatus,
+                  updateAssignee: updateLeadAssignee
                 }}
               />
             </Card>
@@ -217,7 +261,10 @@ export default function Dashboard() {
       <AddLeadDialog 
         open={isAddLeadOpen} 
         onOpenChange={setIsAddLeadOpen}
-        onSuccess={fetchLeads}
+        onSuccess={() => {
+          refreshData();
+          setIsAddLeadOpen(false);
+        }}
       />
     </div>
   );

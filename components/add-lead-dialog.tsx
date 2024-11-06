@@ -38,6 +38,7 @@ const formSchema = z.object({
   source: z.string(),
   program: z.string(),
   status: z.string(),
+  "Assign To": z.string(),
 });
 
 interface AddLeadDialogProps {
@@ -59,31 +60,34 @@ export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogPr
       source: "",
       program: "",
       status: "No Contact",
+      "Assign To": "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { error } = await supabase
-      .from('leads')
-      .insert([values]);
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .insert([values]);
 
-    if (error) {
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Lead added successfully",
+      });
+
+      onSuccess();
+      form.reset();
+    } catch (error) {
       toast({
         title: "Error",
         description: "Failed to add lead",
         variant: "destructive",
       });
-      return;
     }
-
-    toast({
-      title: "Success",
-      description: "Lead added successfully",
-    });
-
-    onSuccess();
-    form.reset();
-    onOpenChange(false);
   }
 
   return (
@@ -208,6 +212,30 @@ export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogPr
                       <SelectItem value="LLM Corporate">LLM Corporate</SelectItem>
                       <SelectItem value="LLM Human Rights">LLM Human Rights</SelectItem>
                       <SelectItem value="Bar Transfer Course">Bar Transfer Course</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="Assign To"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Assign To</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select assignee" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Abubakr Mahmood">Abubakr Mahmood</SelectItem>
+                      <SelectItem value="Alvina Sami">Alvina Sami</SelectItem>
+                      <SelectItem value="Shahzaib Shams">Shahzaib Shams</SelectItem>
+                      <SelectItem value="Faiza Ullah">Faiza Ullah</SelectItem>
+                      <SelectItem value="Aneeza Komal">Aneeza Komal</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
