@@ -82,8 +82,8 @@ export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogPr
     });
 
     onSuccess();
-    onOpenChange(false);
     form.reset();
+    onOpenChange(false);
   }
 
   return (

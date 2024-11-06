@@ -10,6 +10,7 @@ import {
   SortingState,
   getFilteredRowModel,
   ColumnFiltersState,
+  TableOptions,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -29,20 +30,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  meta?: TableOptions<TData>['meta'];
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  meta,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const { toast } = useToast();
 
   const table = useReactTable({
     data,
@@ -53,17 +54,10 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+    meta,
     state: {
       sorting,
       columnFilters,
-    },
-    meta: {
-      updateData: (rowIndex: number, columnId: string, value: unknown) => {
-        toast({
-          title: "Data Updated",
-          description: `Updated ${columnId} for row ${rowIndex + 1}`,
-        });
-      },
     },
   });
 
