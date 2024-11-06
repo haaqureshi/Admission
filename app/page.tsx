@@ -18,6 +18,7 @@ import { Lead } from "@/components/columns";
 export default function Dashboard() {
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const { toast } = useToast();
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -122,6 +123,10 @@ export default function Dashboard() {
     }
   };
 
+  const filteredLeads = selectedStatus
+    ? leads.filter(lead => lead.status === selectedStatus)
+    : leads;
+
   const statusData = [
     { label: "No Contact", count: leads.filter(l => l.status === "No Contact").length, color: "bg-gray-500" },
     { label: "Thinking", count: leads.filter(l => l.status === "Thinking").length, color: "bg-yellow-500" },
@@ -174,6 +179,8 @@ export default function Dashboard() {
               label={status.label}
               count={status.count}
               color={status.color}
+              isSelected={selectedStatus === status.label}
+              onClick={() => setSelectedStatus(selectedStatus === status.label ? null : status.label)}
             />
           ))}
         </div>
@@ -190,18 +197,25 @@ export default function Dashboard() {
 
           <TabsContent value="all" className="space-y-4">
             <Card className="p-6">
-              <div className="flex items-center gap-4 mb-6">
-                <Users className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <h3 className="text-lg font-semibold">Lead Management</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Manage and track all your admission leads
-                  </p>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-4">
+                  <Users className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <h3 className="text-lg font-semibold">Lead Management</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedStatus ? `Showing ${selectedStatus} leads` : 'Manage and track all your admission leads'}
+                    </p>
+                  </div>
                 </div>
+                {selectedStatus && (
+                  <Button variant="ghost" onClick={() => setSelectedStatus(null)}>
+                    Clear Filter
+                  </Button>
+                )}
               </div>
               <DataTable 
                 columns={columns} 
-                data={leads}
+                data={filteredLeads}
                 meta={{
                   updateStatus: updateLeadStatus,
                   updateAssignee: updateLeadAssignee
@@ -214,7 +228,7 @@ export default function Dashboard() {
             <Card className="p-6">
               <DataTable 
                 columns={columns} 
-                data={leads.filter(lead => {
+                data={filteredLeads.filter(lead => {
                   const today = new Date().toISOString().split('T')[0];
                   return lead.created_at.startsWith(today);
                 })}
@@ -230,7 +244,7 @@ export default function Dashboard() {
             <Card className="p-6">
               <DataTable 
                 columns={columns} 
-                data={leads.filter(lead => 
+                data={filteredLeads.filter(lead => 
                   ["No Contact", "Thinking", "Interested"].includes(lead.status)
                 )}
                 meta={{
@@ -245,7 +259,7 @@ export default function Dashboard() {
             <Card className="p-6">
               <DataTable 
                 columns={columns} 
-                data={leads.filter(lead => lead.status === "Won")}
+                data={filteredLeads.filter(lead => lead.status === "Won")}
                 meta={{
                   updateStatus: updateLeadStatus,
                   updateAssignee: updateLeadAssignee
