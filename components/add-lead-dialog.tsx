@@ -26,8 +26,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
-import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -43,10 +43,10 @@ const formSchema = z.object({
 interface AddLeadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onLeadAdded: () => void;
+  onSuccess: () => void;
 }
 
-export function AddLeadDialog({ open, onOpenChange, onLeadAdded }: AddLeadDialogProps) {
+export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogProps) {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -63,28 +63,27 @@ export function AddLeadDialog({ open, onOpenChange, onLeadAdded }: AddLeadDialog
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const { error } = await supabase
-        .from('leads')
-        .insert([values]);
+    const { error } = await supabase
+      .from('leads')
+      .insert([values]);
 
-      if (error) throw error;
-
+    if (error) {
       toast({
-        title: "Lead added successfully",
-        description: "The new lead has been added to the system",
-      });
-
-      onLeadAdded();
-      onOpenChange(false);
-      form.reset();
-    } catch (error) {
-      toast({
-        title: "Error adding lead",
-        description: "Please try again later",
+        title: "Error",
+        description: "Failed to add lead",
         variant: "destructive",
       });
+      return;
     }
+
+    toast({
+      title: "Success",
+      description: "Lead added successfully",
+    });
+
+    onSuccess();
+    onOpenChange(false);
+    form.reset();
   }
 
   return (
@@ -207,38 +206,8 @@ export function AddLeadDialog({ open, onOpenChange, onLeadAdded }: AddLeadDialog
                     <SelectContent>
                       <SelectItem value="LLB (Hons)">LLB (Hons)</SelectItem>
                       <SelectItem value="LLM Corporate">LLM Corporate</SelectItem>
-                      <SelectItem value="LLM Human Rights">
-                        LLM Human Rights
-                      </SelectItem>
-                      <SelectItem value="Bar Transfer Course">
-                        Bar Transfer Course
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Status</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="No Contact">No Contact</SelectItem>
-                      <SelectItem value="Thinking">Thinking</SelectItem>
-                      <SelectItem value="Interested">Interested</SelectItem>
-                      <SelectItem value="Next Session">Next Session</SelectItem>
-                      <SelectItem value="Won">Won</SelectItem>
-                      <SelectItem value="Not Interested">Not Interested</SelectItem>
-                      <SelectItem value="Not Affordable">Not Affordable</SelectItem>
+                      <SelectItem value="LLM Human Rights">LLM Human Rights</SelectItem>
+                      <SelectItem value="Bar Transfer Course">Bar Transfer Course</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

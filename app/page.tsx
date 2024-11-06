@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DataTable } from "@/components/data-table";
 import { columns } from "@/components/columns";
 import { Card } from "@/components/ui/card";
@@ -10,21 +10,69 @@ import { AddLeadDialog } from "@/components/add-lead-dialog";
 import { StatusCard } from "@/components/status-card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
+import { Lead } from "@/components/columns";
 
 export default function Dashboard() {
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
+  const [leads, setLeads] = useState<Lead[]>([]);
   const { toast } = useToast();
 
+  const fetchLeads = async () => {
+    const { data, error } = await supabase
+      .from('leads')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch leads",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLeads(data || []);
+  };
+
+  useEffect(() => {
+    fetchLeads();
+  }, []);
+
+  const updateLeadStatus = async (id: string, status: string) => {
+    const { error } = await supabase
+      .from('leads')
+      .update({ status })
+      .eq('id', id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update lead status",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: "Lead status updated successfully",
+    });
+
+    fetchLeads();
+  };
+
   const statusData = [
-    { label: "No Contact", count: 45, color: "bg-gray-500" },
-    { label: "Thinking", count: 28, color: "bg-yellow-500" },
-    { label: "Interested", count: 32, color: "bg-green-500" },
-    { label: "Next Session", count: 15, color: "bg-blue-500" },
-    { label: "Won", count: 20, color: "bg-emerald-500" },
-    { label: "Not Interested", count: 12, color: "bg-red-500" },
-    { label: "Not Affordable", count: 8, color: "bg-purple-500" },
+    { label: "No Contact", count: leads.filter(l => l.status === "No Contact").length, color: "bg-gray-500" },
+    { label: "Thinking", count: leads.filter(l => l.status === "Thinking").length, color: "bg-yellow-500" },
+    { label: "Interested", count: leads.filter(l => l.status === "Interested").length, color: "bg-green-500" },
+    { label: "Next Session", count: leads.filter(l => l.status === "Next Session").length, color: "bg-blue-500" },
+    { label: "Won", count: leads.filter(l => l.status === "Won").length, color: "bg-emerald-500" },
+    { label: "Not Interested", count: leads.filter(l => l.status === "Not Interested").length, color: "bg-red-500" },
+    { label: "Not Affordable", count: leads.filter(l => l.status === "Not Affordable").length, color: "bg-purple-500" },
   ];
 
   return (
@@ -94,31 +142,64 @@ export default function Dashboard() {
                   </p>
                 </div>
               </div>
-              <DataTable columns={columns} data={[]} />
+              <DataTable 
+                columns={columns} 
+                data={leads}
+                meta={{
+                  updateStatus: updateLeadStatus
+                }}
+              />
             </Card>
           </TabsContent>
 
           <TabsContent value="today">
             <Card className="p-6">
-              <DataTable columns={columns} data={[]} />
+              <DataTable 
+                columns={columns} 
+                data={leads.filter(lead => {
+                  const today = new Date().toISOString().split('T')[0];
+                  return lead.created_at.startsWith(today);
+                })}
+                meta={{
+                  updateStatus: updateLeadStatus
+                }}
+              />
             </Card>
           </TabsContent>
 
           <TabsContent value="pending">
             <Card className="p-6">
-              <DataTable columns={columns} data={[]} />
+              <DataTable 
+                columns={columns} 
+                data={leads.filter(lead => 
+                  ["No Contact", "Thinking", "Interested"].includes(lead.status)
+                )}
+                meta={{
+                  updateStatus: updateLeadStatus
+                }}
+              />
             </Card>
           </TabsContent>
 
           <TabsContent value="converted">
             <Card className="p-6">
-              <DataTable columns={columns} data={[]} />
+              <DataTable 
+                columns={columns} 
+                data={leads.filter(lead => lead.status === "Won")}
+                meta={{
+                  updateStatus: updateLeadStatus
+                }}
+              />
             </Card>
           </TabsContent>
         </Tabs>
       </main>
 
-      <AddLeadDialog open={isAddLeadOpen} onOpenChange={setIsAddLeadOpen} />
+      <AddLeadDialog 
+        open={isAddLeadOpen} 
+        onOpenChange={setIsAddLeadOpen}
+        onSuccess={fetchLeads}
+      />
     </div>
   );
 }
