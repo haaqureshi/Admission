@@ -104,7 +104,7 @@ export const columns: ColumnDef<Lead>[] = [
     id: "actions",
     cell: ({ row, table }) => {
       const lead = row.original;
-      const meta = table.options.meta as { updateStatus: (id: string, status: string) => void };
+      const meta = table.options.meta as { updateStatus: (id: string, status: string) => Promise<void> };
 
       return (
         <DropdownMenu>

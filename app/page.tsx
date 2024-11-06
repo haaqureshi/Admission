@@ -40,6 +40,25 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchLeads();
+
+    // Set up real-time subscription
+    const channel = supabase
+      .channel('leads_changes')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'leads' 
+        }, 
+        () => {
+          fetchLeads();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const updateLeadStatus = async (id: string, status: string) => {
@@ -62,7 +81,7 @@ export default function Dashboard() {
       description: "Lead status updated successfully",
     });
 
-    fetchLeads();
+    await fetchLeads();
   };
 
   const statusData = [
