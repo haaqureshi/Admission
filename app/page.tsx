@@ -34,14 +34,14 @@ export default function Dashboard() {
               <div className="relative w-10 h-10">
                 <Image
                   src="/bsol-logo.png"
-                  alt="BSOL Logo"
+                  alt="Blackstone Board Logo"
                   width={40}
                   height={40}
                   priority
                 />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-primary">BSOL Admission Team</h1>
+                <h1 className="text-2xl font-bold text-primary">Blackstone Board</h1>
                 <p className="text-sm text-muted-foreground">Manage your admission pipeline</p>
               </div>
             </div>

@@ -5,17 +5,17 @@ import { Inter } from 'next/font/google';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'BSOL Admission Team',
+  title: 'Blackstone Board',
   description: 'Admission management system for Blackstone School of Law',
   metadataBase: new URL('https://admission.blackstoneboard.com'),
   openGraph: {
-    title: 'BSOL Admission Team',
+    title: 'Blackstone Board',
     description: 'Admission management system for Blackstone School of Law',
     url: 'https://admission.blackstoneboard.com',
-    siteName: 'BSOL Admission Team',
+    siteName: 'Blackstone Board',
   },
   twitter: {
-    title: 'BSOL Admission Team',
+    title: 'Blackstone Board',
     description: 'Admission management system for Blackstone School of Law',
   },
 };
