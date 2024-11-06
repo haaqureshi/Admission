@@ -11,7 +11,7 @@ import { StatusCard } from "@/components/status-card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/lib/supabase";
 import { Lead } from "@/components/columns";
 
@@ -19,7 +19,7 @@ export default function Dashboard() {
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
   const [leads, setLeads] = useState<Lead[]>([]);
   const { toast } = useToast();
-  const [refreshKey, setRefreshKey] = useState(0); // Add refresh key state
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const fetchLeads = async () => {
     try {
@@ -42,14 +42,13 @@ export default function Dashboard() {
     }
   };
 
-  // Refresh function that can be called to trigger a re-fetch
   const refreshData = () => {
-    setRefreshKey(prev => prev + 1); // Increment refresh key to trigger useEffect
+    setRefreshKey(prev => prev + 1);
   };
 
   useEffect(() => {
     fetchLeads();
-  }, [refreshKey]); // Add refreshKey as dependency
+  }, [refreshKey]);
 
   useEffect(() => {
     const channel = supabase
@@ -61,7 +60,6 @@ export default function Dashboard() {
           table: 'leads' 
         }, 
         () => {
-          // Refresh data whenever any change occurs
           refreshData();
         }
       )
@@ -88,7 +86,7 @@ export default function Dashboard() {
         description: "Lead status updated successfully",
       });
       
-      refreshData(); // Refresh after update
+      refreshData();
     } catch (error) {
       toast({
         title: "Error",
@@ -114,7 +112,7 @@ export default function Dashboard() {
         description: "Lead assignee updated successfully",
       });
       
-      refreshData(); // Refresh after update
+      refreshData();
     } catch (error) {
       toast({
         title: "Error",
