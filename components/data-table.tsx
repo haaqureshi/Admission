@@ -29,18 +29,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { useToast } from "@/components/ui/use-toast";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  onLeadUpdate: () => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  onLeadUpdate,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const { toast } = useToast();
 
   const table = useReactTable({
     data,
@@ -54,6 +59,31 @@ export function DataTable<TData, TValue>({
     state: {
       sorting,
       columnFilters,
+    },
+    meta: {
+      updateStatus: async (id: string, status: string) => {
+        try {
+          const { error } = await supabase
+            .from('leads')
+            .update({ status })
+            .eq('id', id);
+
+          if (error) throw error;
+
+          toast({
+            title: "Status updated",
+            description: "Lead status has been updated successfully",
+          });
+
+          onLeadUpdate();
+        } catch (error) {
+          toast({
+            title: "Error updating status",
+            description: "Please try again later",
+            variant: "destructive",
+          });
+        }
+      },
     },
   });
 

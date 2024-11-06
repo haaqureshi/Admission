@@ -26,6 +26,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/lib/supabase";
+import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -41,9 +43,11 @@ const formSchema = z.object({
 interface AddLeadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onLeadAdded: () => void;
 }
 
-export function AddLeadDialog({ open, onOpenChange }: AddLeadDialogProps) {
+export function AddLeadDialog({ open, onOpenChange, onLeadAdded }: AddLeadDialogProps) {
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -54,13 +58,33 @@ export function AddLeadDialog({ open, onOpenChange }: AddLeadDialogProps) {
       email: "",
       source: "",
       program: "",
-      status: "no_contact",
+      status: "No Contact",
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    onOpenChange(false);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .insert([values]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Lead added successfully",
+        description: "The new lead has been added to the system",
+      });
+
+      onLeadAdded();
+      onOpenChange(false);
+      form.reset();
+    } catch (error) {
+      toast({
+        title: "Error adding lead",
+        description: "Please try again later",
+        variant: "destructive",
+      });
+    }
   }
 
   return (
@@ -123,9 +147,9 @@ export function AddLeadDialog({ open, onOpenChange }: AddLeadDialogProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="bachelors">Bachelors</SelectItem>
-                      <SelectItem value="masters">Masters</SelectItem>
-                      <SelectItem value="phd">PhD</SelectItem>
+                      <SelectItem value="Bachelors">Bachelors</SelectItem>
+                      <SelectItem value="Masters">Masters</SelectItem>
+                      <SelectItem value="PhD">PhD</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -158,10 +182,10 @@ export function AddLeadDialog({ open, onOpenChange }: AddLeadDialogProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="facebook">Facebook</SelectItem>
-                      <SelectItem value="instagram">Instagram</SelectItem>
-                      <SelectItem value="website">Website</SelectItem>
-                      <SelectItem value="referral">Referral</SelectItem>
+                      <SelectItem value="Facebook">Facebook</SelectItem>
+                      <SelectItem value="Instagram">Instagram</SelectItem>
+                      <SelectItem value="Website">Website</SelectItem>
+                      <SelectItem value="Referral">Referral</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -181,14 +205,40 @@ export function AddLeadDialog({ open, onOpenChange }: AddLeadDialogProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="llb_hons">LLB (Hons)</SelectItem>
-                      <SelectItem value="llm_corporate">LLM Corporate</SelectItem>
-                      <SelectItem value="llm_human_rights">
+                      <SelectItem value="LLB (Hons)">LLB (Hons)</SelectItem>
+                      <SelectItem value="LLM Corporate">LLM Corporate</SelectItem>
+                      <SelectItem value="LLM Human Rights">
                         LLM Human Rights
                       </SelectItem>
-                      <SelectItem value="bar_transfer">
+                      <SelectItem value="Bar Transfer Course">
                         Bar Transfer Course
                       </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="No Contact">No Contact</SelectItem>
+                      <SelectItem value="Thinking">Thinking</SelectItem>
+                      <SelectItem value="Interested">Interested</SelectItem>
+                      <SelectItem value="Next Session">Next Session</SelectItem>
+                      <SelectItem value="Won">Won</SelectItem>
+                      <SelectItem value="Not Interested">Not Interested</SelectItem>
+                      <SelectItem value="Not Affordable">Not Affordable</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

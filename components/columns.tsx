@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 export type Lead = {
   id: string;
+  created_at: string;
   name: string;
   dob: string;
   phone: string;
@@ -101,7 +102,10 @@ export const columns: ColumnDef<Lead>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
+      const lead = row.original;
+      const meta = table.options.meta as { updateStatus: (id: string, status: string) => void };
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -110,9 +114,26 @@ export const columns: ColumnDef<Lead>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit Lead
+            <DropdownMenuItem onClick={() => meta.updateStatus(lead.id, "No Contact")}>
+              Set as No Contact
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => meta.updateStatus(lead.id, "Thinking")}>
+              Set as Thinking
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => meta.updateStatus(lead.id, "Interested")}>
+              Set as Interested
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => meta.updateStatus(lead.id, "Next Session")}>
+              Set as Next Session
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => meta.updateStatus(lead.id, "Won")}>
+              Set as Won
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => meta.updateStatus(lead.i<boltAction type="file" filePath="components/columns.tsx">d, "Not Interested")}>
+              Set as Not Interested
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => meta.updateStatus(lead.id, "Not Affordable")}>
+              Set as Not Affordable
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
