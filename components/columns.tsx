@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export type Lead = {
@@ -129,7 +129,7 @@ export const columns: ColumnDef<Lead>[] = [
             <DropdownMenuItem onClick={() => meta.updateStatus(lead.id, "Won")}>
               Set as Won
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => meta.updateStatus(lead.i<boltAction type="file" filePath="components/columns.tsx">d, "Not Interested")}>
+            <DropdownMenuItem onClick={() => meta.updateStatus(lead.id, "Not Interested")}>
               Set as Not Interested
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => meta.updateStatus(lead.id, "Not Affordable")}>
