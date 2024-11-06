@@ -91,6 +91,24 @@ export function DataTable<TData, TValue>({
             <SelectItem value="Bar Transfer Course">Bar Transfer Course</SelectItem>
           </SelectContent>
         </Select>
+        <Select
+          value={(table.getColumn("Assign To")?.getFilterValue() as string) ?? "all"}
+          onValueChange={(value) =>
+            table.getColumn("Assign To")?.setFilterValue(value === "all" ? "" : value)
+          }
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="All Assignees" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Assignees</SelectItem>
+            <SelectItem value="Abubakr Mahmood">Abubakr Mahmood</SelectItem>
+            <SelectItem value="Alvina Sami">Alvina Sami</SelectItem>
+            <SelectItem value="Shahzaib Shams">Shahzaib Shams</SelectItem>
+            <SelectItem value="Faiza Ullah">Faiza Ullah</SelectItem>
+            <SelectItem value="Aneeza Komal">Aneeza Komal</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <div className="rounded-md border">
         <Table>
