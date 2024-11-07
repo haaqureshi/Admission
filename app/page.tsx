@@ -149,6 +149,32 @@ export default function Dashboard() {
     }
   };
 
+  const updateCommunication = async (id: string, communication: string) => {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .update({ communication })
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Communication type updated successfully",
+      });
+      
+      refreshData();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update communication type",
+        variant: "destructive",
+      });
+    }
+  };
+
   const filteredLeads = selectedStatus
     ? leads.filter(lead => lead.status === selectedStatus)
     : leads;
@@ -245,7 +271,8 @@ export default function Dashboard() {
                 meta={{
                   updateStatus: updateLeadStatus,
                   updateAssignee: updateLeadAssignee,
-                  updateFollowUpDate: updateFollowUpDate
+                  updateFollowUpDate: updateFollowUpDate,
+                  updateCommunication: updateCommunication
                 }}
               />
             </Card>
@@ -262,7 +289,8 @@ export default function Dashboard() {
                 meta={{
                   updateStatus: updateLeadStatus,
                   updateAssignee: updateLeadAssignee,
-                  updateFollowUpDate: updateFollowUpDate
+                  updateFollowUpDate: updateFollowUpDate,
+                  updateCommunication: updateCommunication
                 }}
               />
             </Card>
@@ -278,7 +306,8 @@ export default function Dashboard() {
                 meta={{
                   updateStatus: updateLeadStatus,
                   updateAssignee: updateLeadAssignee,
-                  updateFollowUpDate: updateFollowUpDate
+                  updateFollowUpDate: updateFollowUpDate,
+                  updateCommunication: updateCommunication
                 }}
               />
             </Card>
@@ -292,7 +321,8 @@ export default function Dashboard() {
                 meta={{
                   updateStatus: updateLeadStatus,
                   updateAssignee: updateLeadAssignee,
-                  updateFollowUpDate: updateFollowUpDate
+                  updateFollowUpDate: updateFollowUpDate,
+                  updateCommunication: updateCommunication
                 }}
               />
             </Card>

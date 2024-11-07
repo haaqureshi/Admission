@@ -20,7 +20,12 @@ import {
   Brain, 
   Star, 
   BanknoteIcon,
-  Calendar
+  Calendar,
+  Phone,
+  MessageSquare,
+  Mail,
+  MessageCircle,
+  Users
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
@@ -40,6 +45,7 @@ export type Lead = {
   status: string;
   "Assign To": string;
   follow_up_date?: string;
+  communication?: string;
 };
 
 export const columns: ColumnDef<Lead>[] = [
@@ -130,6 +136,57 @@ export const columns: ColumnDef<Lead>[] = [
             />
           </PopoverContent>
         </Popover>
+      );
+    },
+  },
+  {
+    accessorKey: "communication",
+    header: "Communication",
+    cell: ({ row, table }) => {
+      const lead = row.original;
+      const meta = table.options.meta as { 
+        updateCommunication: (id: string, communication: string) => Promise<void> 
+      };
+
+      const communicationConfig = {
+        "Phone": { icon: Phone, color: "text-blue-500" },
+        "WhatsApp": { icon: MessageSquare, color: "text-green-500" },
+        "Email": { icon: Mail, color: "text-orange-500" },
+        "SMS": { icon: MessageCircle, color: "text-purple-500" },
+        "Meeting": { icon: Users, color: "text-indigo-500" },
+      } as const;
+
+      const currentConfig = lead.communication ? communicationConfig[lead.communication as keyof typeof communicationConfig] : null;
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="flex items-center gap-2">
+              {currentConfig ? (
+                <>
+                  <currentConfig.icon className={`h-4 w-4 ${currentConfig.color}`} />
+                  {lead.communication}
+                </>
+              ) : (
+                "Set communication"
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Communication Type</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {Object.entries(communicationConfig).map(([type, config]) => (
+              <DropdownMenuItem
+                key={type}
+                className="flex items-center gap-2"
+                onClick={() => meta.updateCommunication(lead.id, type)}
+              >
+                <config.icon className={`h-4 w-4 ${config.color}`} />
+                {type}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       );
     },
   },
