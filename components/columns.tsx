@@ -136,45 +136,12 @@ export const columns: ColumnDef<Lead>[] = [
   {
     accessorKey: "Assign To",
     header: "Assigned To",
-    cell: ({ row, table }) => {
+    cell: ({ row }) => {
       const lead = row.original;
-      const meta = table.options.meta as { 
-        updateStatus: (id: string, status: string) => Promise<void>;
-        updateAssignee?: (id: string, assignTo: string) => Promise<void>;
-      };
-
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 px-2">
-              <Badge variant="outline" className="cursor-pointer">
-                {lead["Assign To"] || "Unassigned"}
-              </Badge>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            <DropdownMenuItem 
-              onClick={() => meta.updateAssignee?.(lead.id, "Alvina Sami")}
-            >
-              Alvina Sami
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => meta.updateAssignee?.(lead.id, "Shahzaib Shams")}
-            >
-              Shahzaib Shams
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => meta.updateAssignee?.(lead.id, "Faiza Ullah")}
-            >
-              Faiza Ullah
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => meta.updateAssignee?.(lead.id, "Aneeza Komal")}
-            >
-              Aneeza Komal
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Badge variant="outline">
+          {lead["Assign To"] || "Unassigned"}
+        </Badge>
       );
     },
     filterFn: (row, id, value) => {
