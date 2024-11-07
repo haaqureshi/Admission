@@ -28,7 +28,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { format, isToday, isTomorrow, isThisWeek, isAfter, isBefore, startOfToday } from "date-fns";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -48,9 +49,38 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [followUpFilter, setFollowUpFilter] = useState<string>("all");
+  const [pageSize] = useState(10);
+
+  const filterFollowUps = useMemo(() => (row: any) => {
+    const followUpDate = row.follow_up_date ? new Date(row.follow_up_date) : null;
+    const today = startOfToday();
+
+    switch (followUpFilter) {
+      case "today":
+        return followUpDate && isToday(followUpDate);
+      case "tomorrow":
+        return followUpDate && isTomorrow(followUpDate);
+      case "this-week":
+        return followUpDate && isThisWeek(followUpDate, { weekStartsOn: 1 });
+      case "overdue":
+        return followUpDate && isBefore(followUpDate, today);
+      case "upcoming":
+        return followUpDate && isAfter(followUpDate, today);
+      case "not-set":
+        return !followUpDate;
+      default:
+        return true;
+    }
+  }, [followUpFilter]);
+
+  const filteredData = useMemo(() => 
+    data.filter(filterFollowUps),
+    [data, filterFollowUps]
+  );
 
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -61,13 +91,17 @@ export function DataTable<TData, TValue>({
     state: {
       sorting,
       columnFilters,
+      pagination: {
+        pageSize,
+        pageIndex: 0,
+      },
     },
     meta,
   });
 
   return (
     <div>
-      <div className="flex items-center gap-4 py-4">
+      <div className="flex items-center gap-4 py-4 flex-wrap">
         <Input
           placeholder="Search leads..."
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
@@ -110,24 +144,39 @@ export function DataTable<TData, TValue>({
             <SelectItem value="Aneeza Komal">Aneeza Komal</SelectItem>
           </SelectContent>
         </Select>
+        <Select
+          value={followUpFilter}
+          onValueChange={setFollowUpFilter}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Follow-up Date" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Follow-ups</SelectItem>
+            <SelectItem value="today">Today</SelectItem>
+            <SelectItem value="tomorrow">Tomorrow</SelectItem>
+            <SelectItem value="this-week">This Week</SelectItem>
+            <SelectItem value="overdue">Overdue</SelectItem>
+            <SelectItem value="upcoming">Upcoming</SelectItem>
+            <SelectItem value="not-set">Not Set</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
@@ -158,23 +207,28 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
+      <div className="flex items-center justify-between space-x-2 py-4">
+        <div className="text-sm text-muted-foreground">
+          Showing {filteredData.length} results
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );
