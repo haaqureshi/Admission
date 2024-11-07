@@ -154,11 +154,6 @@ export const columns: ColumnDef<Lead>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
             <DropdownMenuItem 
-              onClick={() => meta.updateAssignee?.(lead.id, "Abubakr Mahmood")}
-            >
-              Abubakr Mahmood
-            </DropdownMenuItem>
-            <DropdownMenuItem 
               onClick={() => meta.updateAssignee?.(lead.id, "Alvina Sami")}
             >
               Alvina Sami

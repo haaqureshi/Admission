@@ -103,7 +103,6 @@ export function DataTable<TData, TValue>({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Assignees</SelectItem>
-            <SelectItem value="Abubakr Mahmood">Abubakr Mahmood</SelectItem>
             <SelectItem value="Alvina Sami">Alvina Sami</SelectItem>
             <SelectItem value="Shahzaib Shams">Shahzaib Shams</SelectItem>
             <SelectItem value="Faiza Ullah">Faiza Ullah</SelectItem>
