@@ -123,6 +123,32 @@ export default function Dashboard() {
     }
   };
 
+  const updateFollowUpDate = async (id: string, date: string) => {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .update({ follow_up_date: date })
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Follow-up date updated successfully",
+      });
+      
+      refreshData();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update follow-up date",
+        variant: "destructive",
+      });
+    }
+  };
+
   const filteredLeads = selectedStatus
     ? leads.filter(lead => lead.status === selectedStatus)
     : leads;
@@ -218,7 +244,8 @@ export default function Dashboard() {
                 data={filteredLeads}
                 meta={{
                   updateStatus: updateLeadStatus,
-                  updateAssignee: updateLeadAssignee
+                  updateAssignee: updateLeadAssignee,
+                  updateFollowUpDate: updateFollowUpDate
                 }}
               />
             </Card>
@@ -234,7 +261,8 @@ export default function Dashboard() {
                 })}
                 meta={{
                   updateStatus: updateLeadStatus,
-                  updateAssignee: updateLeadAssignee
+                  updateAssignee: updateLeadAssignee,
+                  updateFollowUpDate: updateFollowUpDate
                 }}
               />
             </Card>
@@ -249,7 +277,8 @@ export default function Dashboard() {
                 )}
                 meta={{
                   updateStatus: updateLeadStatus,
-                  updateAssignee: updateLeadAssignee
+                  updateAssignee: updateLeadAssignee,
+                  updateFollowUpDate: updateFollowUpDate
                 }}
               />
             </Card>
@@ -262,7 +291,8 @@ export default function Dashboard() {
                 data={filteredLeads.filter(lead => lead.status === "Won")}
                 meta={{
                   updateStatus: updateLeadStatus,
-                  updateAssignee: updateLeadAssignee
+                  updateAssignee: updateLeadAssignee,
+                  updateFollowUpDate: updateFollowUpDate
                 }}
               />
             </Card>

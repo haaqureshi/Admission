@@ -11,8 +11,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, CheckCircle2, XCircle, Clock, ThumbsUp, Brain, Star, BanknoteIcon } from "lucide-react";
+import { 
+  MoreHorizontal, 
+  CheckCircle2, 
+  XCircle, 
+  Clock, 
+  ThumbsUp, 
+  Brain, 
+  Star, 
+  BanknoteIcon,
+  Calendar
+} from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { format } from "date-fns";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 
 export type Lead = {
   id: string;
@@ -26,6 +39,7 @@ export type Lead = {
   program: string;
   status: string;
   "Assign To": string;
+  follow_up_date?: string;
 };
 
 export const columns: ColumnDef<Lead>[] = [
@@ -81,6 +95,43 @@ export const columns: ColumnDef<Lead>[] = [
     cell: ({ row }) => (
       <Badge variant="outline">{row.getValue("program")}</Badge>
     ),
+  },
+  {
+    accessorKey: "follow_up_date",
+    header: "Follow-up Date",
+    cell: ({ row, table }) => {
+      const lead = row.original;
+      const meta = table.options.meta as {
+        updateFollowUpDate?: (id: string, date: string) => Promise<void>;
+      };
+
+      return (
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              {lead.follow_up_date ? (
+                format(new Date(lead.follow_up_date), "MMM dd, yyyy")
+              ) : (
+                "Set follow-up"
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <CalendarComponent
+              mode="single"
+              selected={lead.follow_up_date ? new Date(lead.follow_up_date) : undefined}
+              onSelect={(date) => {
+                if (date) {
+                  meta.updateFollowUpDate?.(lead.id, date.toISOString());
+                }
+              }}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    },
   },
   {
     accessorKey: "Assign To",
