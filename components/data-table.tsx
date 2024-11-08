@@ -43,6 +43,7 @@ interface DataTableProps<TData, TValue> {
     updateEducation?: (id: string, education: string) => Promise<void>;
     updateSource?: (id: string, source: string) => Promise<void>;
     updateProgram?: (id: string, program: string) => Promise<void>;
+    updateDob?: (id: string, dob: string) => Promise<void>;
   };
 }
 
