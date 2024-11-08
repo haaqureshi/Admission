@@ -3,12 +3,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
+import { DialogContent } from "@/components/ui/dialog";
+import { DialogHeader } from "@/components/ui/dialog";
+import { DialogTitle } from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -34,6 +32,7 @@ import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getNextAssignee } from "@/lib/utils/assignment";
+import { useState } from "react";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -55,6 +54,7 @@ interface AddLeadDialogProps {
 
 export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogProps) {
   const { toast } = useToast();
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -237,7 +237,7 @@ export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogPr
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel>Follow-up Date</FormLabel>
-                  <Popover>
+                  <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
@@ -260,7 +260,10 @@ export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogPr
                       <Calendar
                         mode="single"
                         selected={field.value ? new Date(field.value) : undefined}
-                        onSelect={(date) => field.onChange(date?.toISOString())}
+                        onSelect={(date) => {
+                          field.onChange(date?.toISOString());
+                          setCalendarOpen(false);
+                        }}
                         initialFocus
                       />
                     </PopoverContent>

@@ -125,13 +125,14 @@ export const columns: ColumnDef<Lead>[] = [
     accessorKey: "dob",
     header: "Date of Birth",
     cell: ({ row, table }) => {
+      const [open, setOpen] = useState(false);
       const lead = row.original;
       const meta = table.options.meta as {
         updateDob?: (id: string, dob: string) => Promise<void>;
       };
 
       return (
-        <Popover>
+        <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button variant="ghost" className="flex items-center gap-2">
               <CalendarDays className="h-4 w-4" />
@@ -149,6 +150,7 @@ export const columns: ColumnDef<Lead>[] = [
               onSelect={(date) => {
                 if (date) {
                   meta.updateDob?.(lead.id, date.toISOString());
+                  setOpen(false);
                 }
               }}
               initialFocus
@@ -331,13 +333,14 @@ export const columns: ColumnDef<Lead>[] = [
     accessorKey: "follow_up_date",
     header: "Follow-up Date",
     cell: ({ row, table }) => {
+      const [open, setOpen] = useState(false);
       const lead = row.original;
       const meta = table.options.meta as {
         updateFollowUpDate?: (id: string, date: string) => Promise<void>;
       };
 
       return (
-        <Popover>
+        <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button variant="ghost" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
@@ -355,6 +358,7 @@ export const columns: ColumnDef<Lead>[] = [
               onSelect={(date) => {
                 if (date) {
                   meta.updateFollowUpDate?.(lead.id, date.toISOString());
+                  setOpen(false);
                 }
               }}
               initialFocus
