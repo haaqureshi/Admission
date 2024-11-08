@@ -55,6 +55,7 @@ interface AddLeadDialogProps {
 export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogProps) {
   const { toast } = useToast();
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -72,6 +73,24 @@ export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogPr
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
+      setIsSubmitting(true);
+
+      // Check if phone number already exists
+      const { data: existingLead } = await supabase
+        .from('leads')
+        .select('id, name, "Assign To", status')
+        .eq('phone', values.phone)
+        .single();
+
+      if (existingLead) {
+        toast({
+          title: "Application Already Exists",
+          description: `An application for ${existingLead.name} is already being processed by ${existingLead["Assign To"]} (Status: ${existingLead.status})`,
+          variant: "destructive",
+        });
+        return;
+      }
+
       const assignTo = getNextAssignee(values.program);
       const leadData = {
         ...values,
@@ -93,12 +112,15 @@ export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogPr
 
       onSuccess();
       form.reset();
+      onOpenChange(false);
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to add lead",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -273,7 +295,9 @@ export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogPr
               )}
             />
             <div className="flex justify-end">
-              <Button type="submit">Add Lead</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Adding..." : "Add Lead"}
+              </Button>
             </div>
           </form>
         </Form>
