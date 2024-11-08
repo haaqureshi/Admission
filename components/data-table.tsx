@@ -39,6 +39,7 @@ interface DataTableProps<TData, TValue> {
     updateAssignee?: (id: string, assignTo: string) => Promise<void>;
     updateFollowUpDate?: (id: string, date: string) => Promise<void>;
     updateCommunication?: (id: string, communication: string) => Promise<void>;
+    updatePulse?: (id: string, pulse: string) => Promise<void>;
   };
 }
 
