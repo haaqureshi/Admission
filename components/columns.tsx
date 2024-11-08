@@ -26,7 +26,10 @@ import {
   Mail,
   MessageCircle,
   Users,
-  Pencil
+  Pencil,
+  GraduationCap,
+  Share2,
+  BookOpen
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
@@ -128,6 +131,50 @@ export const columns: ColumnDef<Lead>[] = [
   {
     accessorKey: "education",
     header: "Education",
+    cell: ({ row, table }) => {
+      const lead = row.original;
+      const meta = table.options.meta as {
+        updateEducation?: (id: string, education: string) => Promise<void>;
+      };
+
+      const educationConfig = {
+        "Bachelors": "bg-blue-100 text-blue-800",
+        "Masters": "bg-purple-100 text-purple-800",
+        "PhD": "bg-green-100 text-green-800"
+      };
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 px-2 hover:bg-accent">
+              <Badge 
+                variant="outline" 
+                className={`cursor-pointer flex gap-1 items-center ${educationConfig[lead.education as keyof typeof educationConfig] || ''}`}
+              >
+                <GraduationCap className="h-3 w-3" />
+                {lead.education || "Set Education"}
+              </Badge>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuLabel>Education Level</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => meta.updateEducation?.(lead.id, "Bachelors")}>
+              <GraduationCap className="h-4 w-4 mr-2 text-blue-600" />
+              Bachelors
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => meta.updateEducation?.(lead.id, "Masters")}>
+              <GraduationCap className="h-4 w-4 mr-2 text-purple-600" />
+              Masters
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => meta.updateEducation?.(lead.id, "PhD")}>
+              <GraduationCap className="h-4 w-4 mr-2 text-green-600" />
+              PhD
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
   },
   {
     accessorKey: "email",
@@ -136,16 +183,113 @@ export const columns: ColumnDef<Lead>[] = [
   {
     accessorKey: "source",
     header: "Source",
-    cell: ({ row }) => (
-      <Badge variant="secondary">{row.getValue("source")}</Badge>
-    ),
+    cell: ({ row, table }) => {
+      const lead = row.original;
+      const meta = table.options.meta as {
+        updateSource?: (id: string, source: string) => Promise<void>;
+      };
+
+      const sourceConfig = {
+        "Facebook": "bg-blue-100 text-blue-800",
+        "Instagram": "bg-pink-100 text-pink-800",
+        "Website": "bg-indigo-100 text-indigo-800",
+        "Referral": "bg-green-100 text-green-800",
+        "Walk-in": "bg-amber-100 text-amber-800"
+      };
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 px-2 hover:bg-accent">
+              <Badge 
+                variant="outline" 
+                className={`cursor-pointer flex gap-1 items-center ${sourceConfig[lead.source as keyof typeof sourceConfig] || ''}`}
+              >
+                <Share2 className="h-3 w-3" />
+                {lead.source || "Set Source"}
+              </Badge>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuLabel>Lead Source</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => meta.updateSource?.(lead.id, "Facebook")}>
+              <Share2 className="h-4 w-4 mr-2 text-blue-600" />
+              Facebook
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => meta.updateSource?.(lead.id, "Instagram")}>
+              <Share2 className="h-4 w-4 mr-2 text-pink-600" />
+              Instagram
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => meta.updateSource?.(lead.id, "Website")}>
+              <Share2 className="h-4 w-4 mr-2 text-indigo-600" />
+              Website
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => meta.updateSource?.(lead.id, "Referral")}>
+              <Share2 className="h-4 w-4 mr-2 text-green-600" />
+              Referral
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => meta.updateSource?.(lead.id, "Walk-in")}>
+              <Share2 className="h-4 w-4 mr-2 text-amber-600" />
+              Walk-in
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
   },
   {
     accessorKey: "program",
     header: "Program",
-    cell: ({ row }) => (
-      <Badge variant="outline">{row.getValue("program")}</Badge>
-    ),
+    cell: ({ row, table }) => {
+      const lead = row.original;
+      const meta = table.options.meta as {
+        updateProgram?: (id: string, program: string) => Promise<void>;
+      };
+
+      const programConfig = {
+        "LLB (Hons)": "bg-blue-100 text-blue-800",
+        "LLM Corporate": "bg-emerald-100 text-emerald-800",
+        "LLM Human Rights": "bg-purple-100 text-purple-800",
+        "Bar Transfer Course": "bg-amber-100 text-amber-800"
+      };
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 px-2 hover:bg-accent">
+              <Badge 
+                variant="outline" 
+                className={`cursor-pointer flex gap-1 items-center ${programConfig[lead.program as keyof typeof programConfig] || ''}`}
+              >
+                <BookOpen className="h-3 w-3" />
+                {lead.program || "Set Program"}
+              </Badge>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuLabel>Program</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => meta.updateProgram?.(lead.id, "LLB (Hons)")}>
+              <BookOpen className="h-4 w-4 mr-2 text-blue-600" />
+              LLB (Hons)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => meta.updateProgram?.(lead.id, "LLM Corporate")}>
+              <BookOpen className="h-4 w-4 mr-2 text-emerald-600" />
+              LLM Corporate
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => meta.updateProgram?.(lead.id, "LLM Human Rights")}>
+              <BookOpen className="h-4 w-4 mr-2 text-purple-600" />
+              LLM Human Rights
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => meta.updateProgram?.(lead.id, "Bar Transfer Course")}>
+              <BookOpen className="h-4 w-4 mr-2 text-amber-600" />
+              Bar Transfer Course
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
   },
   {
     accessorKey: "follow_up_date",

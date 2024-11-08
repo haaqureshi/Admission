@@ -201,6 +201,84 @@ export default function Dashboard() {
     }
   };
 
+  const updateEducation = async (id: string, education: string) => {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .update({ education })
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Education updated successfully",
+      });
+      
+      refreshData();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update education",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const updateSource = async (id: string, source: string) => {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .update({ source })
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Source updated successfully",
+      });
+      
+      refreshData();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update source",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const updateProgram = async (id: string, program: string) => {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .update({ program })
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Program updated successfully",
+      });
+      
+      refreshData();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update program",
+        variant: "destructive",
+      });
+    }
+  };
+
   const filteredLeads = selectedStatus
     ? leads.filter(lead => lead.status === selectedStatus)
     : leads;
@@ -299,7 +377,10 @@ export default function Dashboard() {
                   updateAssignee: updateLeadAssignee,
                   updateFollowUpDate: updateFollowUpDate,
                   updateCommunication: updateCommunication,
-                  updatePulse: updatePulse
+                  updatePulse: updatePulse,
+                  updateEducation: updateEducation,
+                  updateSource: updateSource,
+                  updateProgram: updateProgram
                 }}
               />
             </Card>
@@ -318,7 +399,10 @@ export default function Dashboard() {
                   updateAssignee: updateLeadAssignee,
                   updateFollowUpDate: updateFollowUpDate,
                   updateCommunication: updateCommunication,
-                  updatePulse: updatePulse
+                  updatePulse: updatePulse,
+                  updateEducation: updateEducation,
+                  updateSource: updateSource,
+                  updateProgram: updateProgram
                 }}
               />
             </Card>
@@ -336,7 +420,10 @@ export default function Dashboard() {
                   updateAssignee: updateLeadAssignee,
                   updateFollowUpDate: updateFollowUpDate,
                   updateCommunication: updateCommunication,
-                  updatePulse: updatePulse
+                  updatePulse: updatePulse,
+                  updateEducation: updateEducation,
+                  updateSource: updateSource,
+                  updateProgram: updateProgram
                 }}
               />
             </Card>
@@ -352,7 +439,10 @@ export default function Dashboard() {
                   updateAssignee: updateLeadAssignee,
                   updateFollowUpDate: updateFollowUpDate,
                   updateCommunication: updateCommunication,
-                  updatePulse: updatePulse
+                  updatePulse: updatePulse,
+                  updateEducation: updateEducation,
+                  updateSource: updateSource,
+                  updateProgram: updateProgram
                 }}
               />
             </Card>
