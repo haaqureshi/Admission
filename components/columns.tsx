@@ -186,7 +186,7 @@ export const columns: ColumnDef<Lead>[] = [
   },
   {
     accessorKey: "communication",
-    header: "Communication",
+    header: "Channel",
     cell: ({ row, table }) => {
       const lead = row.original;
       const meta = table.options.meta as { 
@@ -213,12 +213,12 @@ export const columns: ColumnDef<Lead>[] = [
                   {lead.communication}
                 </>
               ) : (
-                "Set communication"
+                "Set channel"
               )}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Communication Type</DropdownMenuLabel>
+            <DropdownMenuLabel>Channel Type</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {Object.entries(communicationConfig).map(([type, config]) => (
               <DropdownMenuItem
