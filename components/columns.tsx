@@ -30,7 +30,9 @@ import {
   GraduationCap,
   Share2,
   BookOpen,
-  CalendarDays
+  CalendarDays,
+  Check,
+  X
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
@@ -39,6 +41,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
 
 export type Lead = {
   id: string;
@@ -165,6 +168,71 @@ export const columns: ColumnDef<Lead>[] = [
   {
     accessorKey: "phone",
     header: "Phone",
+    cell: ({ row, table }) => {
+      const [isEditing, setIsEditing] = useState(false);
+      const [phoneNumber, setPhoneNumber] = useState(row.original.phone);
+      const meta = table.options.meta as {
+        updatePhone?: (id: string, phone: string) => Promise<void>;
+      };
+
+      const handleSave = async () => {
+        if (meta.updatePhone) {
+          await meta.updatePhone(row.original.id, phoneNumber);
+          setIsEditing(false);
+        }
+      };
+
+      if (isEditing) {
+        return (
+          <div className="flex items-center gap-2">
+            <Input
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              className="h-8 w-[150px]"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSave();
+                } else if (e.key === 'Escape') {
+                  setIsEditing(false);
+                  setPhoneNumber(row.original.phone);
+                }
+              }}
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={handleSave}
+            >
+              <Check className="h-4 w-4 text-green-600" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => {
+                setIsEditing(false);
+                setPhoneNumber(row.original.phone);
+              }}
+            >
+              <X className="h-4 w-4 text-red-600" />
+            </Button>
+          </div>
+        );
+      }
+
+      return (
+        <Button
+          variant="ghost"
+          className="flex items-center gap-2"
+          onClick={() => setIsEditing(true)}
+        >
+          <Phone className="h-4 w-4" />
+          {phoneNumber}
+        </Button>
+      );
+    },
   },
   {
     accessorKey: "education",
