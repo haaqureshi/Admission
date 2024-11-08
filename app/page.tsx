@@ -10,6 +10,7 @@ import { AddLeadDialog } from "@/components/add-lead-dialog";
 import { StatusCard } from "@/components/status-card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MetricsDashboard } from "@/components/metrics-dashboard";
 import Image from "next/image";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/lib/supabase";
@@ -380,30 +381,28 @@ export default function Dashboard() {
       </nav>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {statusData.map((status) => (
-            <StatusCard
-              key={status.label}
-              label={status.label}
-              count={status.count}
-              color={status.color}
-              isSelected={selectedStatus === status.label}
-              onClick={() => setSelectedStatus(selectedStatus === status.label ? null : status.label)}
-            />
-          ))}
-        </div>
-
-        <Tabs defaultValue="all" className="space-y-6">
+        <Tabs defaultValue="leads" className="space-y-6">
           <div className="flex justify-between items-center">
             <TabsList>
-              <TabsTrigger value="all">All Leads</TabsTrigger>
-              <TabsTrigger value="today">Today</TabsTrigger>
-              <TabsTrigger value="pending">Pending</TabsTrigger>
-              <TabsTrigger value="converted">Converted</TabsTrigger>
+              <TabsTrigger value="leads">Leads Management</TabsTrigger>
+              <TabsTrigger value="reporting">Reporting</TabsTrigger>
             </TabsList>
           </div>
 
-          <TabsContent value="all" className="space-y-4">
+          <TabsContent value="leads">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              {statusData.map((status) => (
+                <StatusCard
+                  key={status.label}
+                  label={status.label}
+                  count={status.count}
+                  color={status.color}
+                  isSelected={selectedStatus === status.label}
+                  onClick={() => setSelectedStatus(selectedStatus === status.label ? null : status.label)}
+                />
+              ))}
+            </div>
+
             <Card className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-4">
@@ -440,71 +439,9 @@ export default function Dashboard() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="today">
+          <TabsContent value="reporting">
             <Card className="p-6">
-              <DataTable 
-                columns={columns} 
-                data={filteredLeads.filter(lead => {
-                  const today = new Date().toISOString().split('T')[0];
-                  return lead.created_at.startsWith(today);
-                })}
-                meta={{
-                  updateStatus: updateLeadStatus,
-                  updateAssignee: updateLeadAssignee,
-                  updateFollowUpDate: updateFollowUpDate,
-                  updateCommunication: updateCommunication,
-                  updatePulse: updatePulse,
-                  updateEducation: updateEducation,
-                  updateSource: updateSource,
-                  updateProgram: updateProgram,
-                  updateDob: updateDob,
-                  updatePhone: updatePhone
-                }}
-              />
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="pending">
-            <Card className="p-6">
-              <DataTable 
-                columns={columns} 
-                data={filteredLeads.filter(lead => 
-                  ["No Contact", "Thinking", "Interested"].includes(lead.status)
-                )}
-                meta={{
-                  updateStatus: updateLeadStatus,
-                  updateAssignee: updateLeadAssignee,
-                  updateFollowUpDate: updateFollowUpDate,
-                  updateCommunication: updateCommunication,
-                  updatePulse: updatePulse,
-                  updateEducation: updateEducation,
-                  updateSource: updateSource,
-                  updateProgram: updateProgram,
-                  updateDob: updateDob,
-                  updatePhone: updatePhone
-                }}
-              />
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="converted">
-            <Card className="p-6">
-              <DataTable 
-                columns={columns} 
-                data={filteredLeads.filter(lead => lead.status === "Won")}
-                meta={{
-                  updateStatus: updateLeadStatus,
-                  updateAssignee: updateLeadAssignee,
-                  updateFollowUpDate: updateFollowUpDate,
-                  updateCommunication: updateCommunication,
-                  updatePulse: updatePulse,
-                  updateEducation: updateEducation,
-                  updateSource: updateSource,
-                  updateProgram: updateProgram,
-                  updateDob: updateDob,
-                  updatePhone: updatePhone
-                }}
-              />
+              <MetricsDashboard />
             </Card>
           </TabsContent>
         </Tabs>
