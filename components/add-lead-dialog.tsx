@@ -201,6 +201,7 @@ export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogPr
                       <SelectItem value="Instagram">Instagram</SelectItem>
                       <SelectItem value="Website">Website</SelectItem>
                       <SelectItem value="Referral">Referral</SelectItem>
+                      <SelectItem value="Walk-in">Walk-in</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
