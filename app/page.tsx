@@ -175,6 +175,32 @@ export default function Dashboard() {
     }
   };
 
+  const updatePulse = async (id: string, pulse: string) => {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .update({ pulse })
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Lead pulse updated successfully",
+      });
+      
+      refreshData();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update lead pulse",
+        variant: "destructive",
+      });
+    }
+  };
+
   const filteredLeads = selectedStatus
     ? leads.filter(lead => lead.status === selectedStatus)
     : leads;
@@ -272,7 +298,8 @@ export default function Dashboard() {
                   updateStatus: updateLeadStatus,
                   updateAssignee: updateLeadAssignee,
                   updateFollowUpDate: updateFollowUpDate,
-                  updateCommunication: updateCommunication
+                  updateCommunication: updateCommunication,
+                  updatePulse: updatePulse
                 }}
               />
             </Card>
@@ -290,7 +317,8 @@ export default function Dashboard() {
                   updateStatus: updateLeadStatus,
                   updateAssignee: updateLeadAssignee,
                   updateFollowUpDate: updateFollowUpDate,
-                  updateCommunication: updateCommunication
+                  updateCommunication: updateCommunication,
+                  updatePulse: updatePulse
                 }}
               />
             </Card>
@@ -307,7 +335,8 @@ export default function Dashboard() {
                   updateStatus: updateLeadStatus,
                   updateAssignee: updateLeadAssignee,
                   updateFollowUpDate: updateFollowUpDate,
-                  updateCommunication: updateCommunication
+                  updateCommunication: updateCommunication,
+                  updatePulse: updatePulse
                 }}
               />
             </Card>
@@ -322,7 +351,8 @@ export default function Dashboard() {
                   updateStatus: updateLeadStatus,
                   updateAssignee: updateLeadAssignee,
                   updateFollowUpDate: updateFollowUpDate,
-                  updateCommunication: updateCommunication
+                  updateCommunication: updateCommunication,
+                  updatePulse: updatePulse
                 }}
               />
             </Card>

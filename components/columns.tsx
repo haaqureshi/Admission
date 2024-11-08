@@ -25,12 +25,16 @@ import {
   MessageSquare,
   Mail,
   MessageCircle,
-  Users
+  Users,
+  Pencil
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
 
 export type Lead = {
   id: string;
@@ -46,7 +50,48 @@ export type Lead = {
   "Assign To": string;
   follow_up_date?: string;
   communication?: string;
+  pulse?: string;
 };
+
+function PulseDialog({ 
+  isOpen, 
+  onOpenChange, 
+  initialValue, 
+  onSave 
+}: { 
+  isOpen: boolean; 
+  onOpenChange: (open: boolean) => void; 
+  initialValue?: string;
+  onSave: (value: string) => void;
+}) {
+  const [value, setValue] = useState(initialValue || '');
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Update Lead Pulse</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <Textarea
+            placeholder="Enter the latest update about this lead..."
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            className="min-h-[100px]"
+          />
+          <div className="flex justify-end">
+            <Button onClick={() => {
+              onSave(value);
+              onOpenChange(false);
+            }}>
+              Save Update
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export const columns: ColumnDef<Lead>[] = [
   {
@@ -291,6 +336,36 @@ export const columns: ColumnDef<Lead>[] = [
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+      );
+    },
+  },
+  {
+    accessorKey: "pulse",
+    header: "Pulse",
+    cell: ({ row, table }) => {
+      const [isDialogOpen, setIsDialogOpen] = useState(false);
+      const lead = row.original;
+      const meta = table.options.meta as {
+        updatePulse: (id: string, pulse: string) => Promise<void>;
+      };
+
+      return (
+        <>
+          <Button
+            variant="ghost"
+            className="flex items-center gap-2 max-w-[200px] truncate"
+            onClick={() => setIsDialogOpen(true)}
+          >
+            <Pencil className="h-4 w-4" />
+            {lead.pulse || "Add update"}
+          </Button>
+          <PulseDialog
+            isOpen={isDialogOpen}
+            onOpenChange={setIsDialogOpen}
+            initialValue={lead.pulse}
+            onSave={(value) => meta.updatePulse(lead.id, value)}
+          />
+        </>
       );
     },
   },
