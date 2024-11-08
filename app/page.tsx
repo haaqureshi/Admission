@@ -279,6 +279,32 @@ export default function Dashboard() {
     }
   };
 
+  const updateDob = async (id: string, dob: string) => {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .update({ dob })
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Date of birth updated successfully",
+      });
+      
+      refreshData();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update date of birth",
+        variant: "destructive",
+      });
+    }
+  };
+
   const filteredLeads = selectedStatus
     ? leads.filter(lead => lead.status === selectedStatus)
     : leads;
@@ -380,7 +406,8 @@ export default function Dashboard() {
                   updatePulse: updatePulse,
                   updateEducation: updateEducation,
                   updateSource: updateSource,
-                  updateProgram: updateProgram
+                  updateProgram: updateProgram,
+                  updateDob: updateDob
                 }}
               />
             </Card>
@@ -402,7 +429,8 @@ export default function Dashboard() {
                   updatePulse: updatePulse,
                   updateEducation: updateEducation,
                   updateSource: updateSource,
-                  updateProgram: updateProgram
+                  updateProgram: updateProgram,
+                  updateDob: updateDob
                 }}
               />
             </Card>
@@ -423,7 +451,8 @@ export default function Dashboard() {
                   updatePulse: updatePulse,
                   updateEducation: updateEducation,
                   updateSource: updateSource,
-                  updateProgram: updateProgram
+                  updateProgram: updateProgram,
+                  updateDob: updateDob
                 }}
               />
             </Card>
@@ -442,7 +471,8 @@ export default function Dashboard() {
                   updatePulse: updatePulse,
                   updateEducation: updateEducation,
                   updateSource: updateSource,
-                  updateProgram: updateProgram
+                  updateProgram: updateProgram,
+                  updateDob: updateDob
                 }}
               />
             </Card>

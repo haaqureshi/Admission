@@ -29,7 +29,8 @@ import {
   Pencil,
   GraduationCap,
   Share2,
-  BookOpen
+  BookOpen,
+  CalendarDays
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
@@ -123,6 +124,41 @@ export const columns: ColumnDef<Lead>[] = [
   {
     accessorKey: "dob",
     header: "Date of Birth",
+    cell: ({ row, table }) => {
+      const lead = row.original;
+      const meta = table.options.meta as {
+        updateDob?: (id: string, dob: string) => Promise<void>;
+      };
+
+      return (
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" className="flex items-center gap-2">
+              <CalendarDays className="h-4 w-4" />
+              {lead.dob ? (
+                format(new Date(lead.dob), "MMM dd, yyyy")
+              ) : (
+                "Set date of birth"
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <CalendarComponent
+              mode="single"
+              selected={lead.dob ? new Date(lead.dob) : undefined}
+              onSelect={(date) => {
+                if (date) {
+                  meta.updateDob?.(lead.id, date.toISOString());
+                }
+              }}
+              initialFocus
+              fromYear={1940}
+              toYear={new Date().getFullYear()}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    },
   },
   {
     accessorKey: "phone",
