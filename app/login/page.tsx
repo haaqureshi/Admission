@@ -16,9 +16,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { School } from "lucide-react";
+import Image from "next/image";
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -92,8 +93,14 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-2 flex flex-col items-center text-center">
-          <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mb-4">
-            <School className="w-6 h-6 text-primary-foreground" />
+          <div className="w-20 h-20 relative mb-4">
+            <Image
+              src="/bsol-logo.png"
+              alt="Blackstone Board Logo"
+              fill
+              className="object-contain"
+              priority
+            />
           </div>
           <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
           <CardDescription>
