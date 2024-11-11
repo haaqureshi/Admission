@@ -332,6 +332,58 @@ export default function Dashboard() {
     }
   };
 
+  const updateName = async (id: string, name: string) => {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .update({ name })
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Name updated successfully",
+      });
+      
+      refreshData();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update name",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const updateEmail = async (id: string, email: string) => {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .update({ email })
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Email updated successfully",
+      });
+      
+      refreshData();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update email",
+        variant: "destructive",
+      });
+    }
+  };
+
   const filteredLeads = selectedStatus
     ? leads.filter(lead => lead.status === selectedStatus)
     : leads;
@@ -433,7 +485,9 @@ export default function Dashboard() {
                   updateSource: updateSource,
                   updateProgram: updateProgram,
                   updateDob: updateDob,
-                  updatePhone: updatePhone
+                  updatePhone: updatePhone,
+                  updateName: updateName,
+                  updateEmail: updateEmail
                 }}
               />
             </Card>

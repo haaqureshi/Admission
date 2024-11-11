@@ -32,7 +32,8 @@ import {
   BookOpen,
   CalendarDays,
   Check,
-  X
+  X,
+  User,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
@@ -123,6 +124,71 @@ export const columns: ColumnDef<Lead>[] = [
   {
     accessorKey: "name",
     header: "Name",
+    cell: ({ row, table }) => {
+      const [isEditing, setIsEditing] = useState(false);
+      const [name, setName] = useState(row.original.name);
+      const meta = table.options.meta as {
+        updateName?: (id: string, name: string) => Promise<void>;
+      };
+
+      const handleSave = async () => {
+        if (meta.updateName) {
+          await meta.updateName(row.original.id, name);
+          setIsEditing(false);
+        }
+      };
+
+      if (isEditing) {
+        return (
+          <div className="flex items-center gap-2">
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="h-8 w-[200px]"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSave();
+                } else if (e.key === 'Escape') {
+                  setIsEditing(false);
+                  setName(row.original.name);
+                }
+              }}
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={handleSave}
+            >
+              <Check className="h-4 w-4 text-green-600" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => {
+                setIsEditing(false);
+                setName(row.original.name);
+              }}
+            >
+              <X className="h-4 w-4 text-red-600" />
+            </Button>
+          </div>
+        );
+      }
+
+      return (
+        <Button
+          variant="ghost"
+          className="flex items-center gap-2"
+          onClick={() => setIsEditing(true)}
+        >
+          <User className="h-4 w-4" />
+          {name}
+        </Button>
+      );
+    },
   },
   {
     accessorKey: "dob",
@@ -285,6 +351,72 @@ export const columns: ColumnDef<Lead>[] = [
   {
     accessorKey: "email",
     header: "Email",
+    cell: ({ row, table }) => {
+      const [isEditing, setIsEditing] = useState(false);
+      const [email, setEmail] = useState(row.original.email);
+      const meta = table.options.meta as {
+        updateEmail?: (id: string, email: string) => Promise<void>;
+      };
+
+      const handleSave = async () => {
+        if (meta.updateEmail) {
+          await meta.updateEmail(row.original.id, email);
+          setIsEditing(false);
+        }
+      };
+
+      if (isEditing) {
+        return (
+          <div className="flex items-center gap-2">
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="h-8 w-[200px]"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSave();
+                } else if (e.key === 'Escape') {
+                  setIsEditing(false);
+                  setEmail(row.original.email);
+                }
+              }}
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={handleSave}
+            >
+              <Check className="h-4 w-4 text-green-600" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => {
+                setIsEditing(false);
+                setEmail(row.original.email);
+              }}
+            >
+              <X className="h-4 w-4 text-red-600" />
+            </Button>
+          </div>
+        );
+      }
+
+      return (
+        <Button
+          variant="ghost"
+          className="flex items-center gap-2"
+          onClick={() => setIsEditing(true)}
+        >
+          <Mail className="h-4 w-4" />
+          {email}
+        </Button>
+      );
+    },
   },
   {
     accessorKey: "source",
