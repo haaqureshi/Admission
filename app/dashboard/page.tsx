@@ -1,4 +1,4 @@
-"use client";
+{`"use client";
 
 import { DataTable } from "@/components/data-table";
 import { columns } from "@/components/columns";
@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MetricsDashboard } from "@/components/metrics-dashboard";
 import Image from "next/image";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { Lead } from "@/components/columns";
 import { useState, useEffect } from "react";
@@ -173,7 +173,7 @@ export default function Dashboard() {
                   <div>
                     <h3 className="text-lg font-semibold">Lead Management</h3>
                     <p className="text-sm text-muted-foreground">
-                      {selectedStatus ? `Showing ${selectedStatus} leads` : 'Manage and track all your admission leads'}
+                      {selectedStatus ? \`Showing \${selectedStatus} leads\` : 'Manage and track all your admission leads'}
                     </p>
                   </div>
                 </div>
@@ -187,13 +187,12 @@ export default function Dashboard() {
                 columns={columns} 
                 data={selectedStatus ? leads.filter(lead => lead.status === selectedStatus) : leads}
                 meta={{
-                  updateStatus: async (id, status) => {
+                  updateStatus: async (id: string, status: string): Promise<void> => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ status })
                       .eq('id', id);
                     if (!error) refreshData();
-                    return error;
                   }
                 }}
               />
@@ -218,4 +217,4 @@ export default function Dashboard() {
       />
     </div>
   );
-}
+}`}
