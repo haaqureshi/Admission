@@ -1,4 +1,4 @@
-{`"use client";
+"use client";
 
 import { DataTable } from "@/components/data-table";
 import { columns } from "@/components/columns";
@@ -173,7 +173,7 @@ export default function Dashboard() {
                   <div>
                     <h3 className="text-lg font-semibold">Lead Management</h3>
                     <p className="text-sm text-muted-foreground">
-                      {selectedStatus ? \`Showing \${selectedStatus} leads\` : 'Manage and track all your admission leads'}
+                      {selectedStatus ? `Showing ${selectedStatus} leads` : 'Manage and track all your admission leads'}
                     </p>
                   </div>
                 </div>
@@ -217,4 +217,4 @@ export default function Dashboard() {
       />
     </div>
   );
-}`}
+}
