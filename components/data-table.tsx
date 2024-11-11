@@ -45,6 +45,8 @@ interface DataTableProps<TData, TValue> {
     updateProgram?: (id: string, program: string) => Promise<void>;
     updateDob?: (id: string, dob: string) => Promise<void>;
     updatePhone?: (id: string, phone: string) => Promise<void>;
+    updateName?: (id: string, name: string) => Promise<void>;
+    updateEmail?: (id: string, email: string) => Promise<void>;
   };
 }
 
