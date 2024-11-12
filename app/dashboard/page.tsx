@@ -187,10 +187,80 @@ export default function Dashboard() {
                 columns={columns} 
                 data={selectedStatus ? leads.filter(lead => lead.status === selectedStatus) : leads}
                 meta={{
-                  updateStatus: async (id: string, status: string): Promise<void> => {
+                  updateStatus: async (id: string, status: string) => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ status })
+                      .eq('id', id);
+                    if (!error) refreshData();
+                  },
+                  updatePulse: async (id: string, pulse: string) => {
+                    const { error } = await supabase
+                      .from('leads')
+                      .update({ pulse })
+                      .eq('id', id);
+                    if (!error) refreshData();
+                  },
+                  updateName: async (id: string, name: string) => {
+                    const { error } = await supabase
+                      .from('leads')
+                      .update({ name })
+                      .eq('id', id);
+                    if (!error) refreshData();
+                  },
+                  updatePhone: async (id: string, phone: string) => {
+                    const { error } = await supabase
+                      .from('leads')
+                      .update({ phone })
+                      .eq('id', id);
+                    if (!error) refreshData();
+                  },
+                  updateEmail: async (id: string, email: string) => {
+                    const { error } = await supabase
+                      .from('leads')
+                      .update({ email })
+                      .eq('id', id);
+                    if (!error) refreshData();
+                  },
+                  updateDob: async (id: string, dob: string) => {
+                    const { error } = await supabase
+                      .from('leads')
+                      .update({ dob })
+                      .eq('id', id);
+                    if (!error) refreshData();
+                  },
+                  updateEducation: async (id: string, education: string) => {
+                    const { error } = await supabase
+                      .from('leads')
+                      .update({ education })
+                      .eq('id', id);
+                    if (!error) refreshData();
+                  },
+                  updateSource: async (id: string, source: string) => {
+                    const { error } = await supabase
+                      .from('leads')
+                      .update({ source })
+                      .eq('id', id);
+                    if (!error) refreshData();
+                  },
+                  updateProgram: async (id: string, program: string) => {
+                    const { error } = await supabase
+                      .from('leads')
+                      .update({ program })
+                      .eq('id', id);
+                    if (!error) refreshData();
+                  },
+                  updateFollowUpDate: async (id: string, follow_up_date: string) => {
+                    const { error } = await supabase
+                      .from('leads')
+                      .update({ follow_up_date })
+                      .eq('id', id);
+                    if (!error) refreshData();
+                  },
+                  updateCommunication: async (id: string, communication: string) => {
+                    const { error } = await supabase
+                      .from('leads')
+                      .update({ communication })
                       .eq('id', id);
                     if (!error) refreshData();
                   }
