@@ -1,79 +1,27 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
 import { DataTable } from "@/components/data-table";
 import { columns } from "@/components/columns";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Users, Search, LogOut } from "lucide-react";
+import { UserPlus, Users, Search } from "lucide-react";
 import { AddLeadDialog } from "@/components/add-lead-dialog";
 import { StatusCard } from "@/components/status-card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MetricsDashboard } from "@/components/metrics-dashboard";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 import { Lead } from "@/components/columns";
-import { signOut } from "@/lib/auth";
-import dynamic from 'next/dynamic';
-
-const MetricsDashboard = dynamic(
-  () => import("@/components/metrics-dashboard"),
-  { ssr: false }
-);
+import { useState, useEffect } from "react";
 
 export default function Dashboard() {
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [user, setUser] = useState<any>(null);
   const { toast } = useToast();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const handleInitialAuth = async () => {
-      const code = searchParams.get('code');
-      if (code) {
-        try {
-          const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(code);
-          if (error) throw error;
-          if (session) {
-            setUser(session.user);
-            router.replace('/dashboard'); // Remove code from URL
-          }
-        } catch (error) {
-          console.error('Error exchanging code:', error);
-          router.push('/login?error=auth');
-        }
-      } else {
-        // Check existing session
-        const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
-      }
-    };
-
-    handleInitialAuth();
-  }, [searchParams, router]);
-
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      router.push('/login');
-      toast({
-        title: "Logged out",
-        description: "Successfully signed out",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to sign out",
-        variant: "destructive",
-      });
-    }
-  };
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const fetchLeads = async () => {
     try {
@@ -134,8 +82,6 @@ export default function Dashboard() {
     { label: "Not Affordable", count: leads.filter(l => l.status === "Not Affordable").length, color: "bg-purple-500" },
   ];
 
-  if (!user) return null;
-
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white border-b">
@@ -153,7 +99,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-primary">Blackstone Board</h1>
-                <p className="text-sm text-muted-foreground">Welcome, {user.email}</p>
+                <p className="text-sm text-muted-foreground">Admission Management System</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -164,10 +110,6 @@ export default function Dashboard() {
               <Button onClick={() => setIsAddLeadOpen(true)}>
                 <UserPlus className="mr-2 h-4 w-4" />
                 Add Lead
-              </Button>
-              <Button variant="outline" onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign Out
               </Button>
             </div>
           </div>

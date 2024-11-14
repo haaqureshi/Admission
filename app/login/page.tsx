@@ -1,45 +1,93 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { signInWithGoogle } from "@/lib/auth";
-import Image from "next/image";
-import { useSearchParams } from "next/navigation";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import { School } from "lucide-react";
+import Image from "next/image";
+
+const formSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
 
 export default function LoginPage() {
-  const searchParams = useSearchParams();
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
   const { toast } = useToast();
-  
-  useEffect(() => {
-    const error = searchParams.get('error');
-    if (error === 'domain') {
-      toast({
-        title: "Access Denied",
-        description: "Only @bsolpk.org email addresses are allowed",
-        variant: "destructive",
-      });
-    } else if (error === 'auth') {
-      toast({
-        title: "Authentication Error",
-        description: "There was a problem signing you in. Please try again.",
-        variant: "destructive",
-      });
-    }
-  }, [searchParams, toast]);
 
-  const handleLogin = async () => {
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      router.push("/dashboard");
+    }
+  }, [router]);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await signInWithGoogle();
+      setIsLoading(true);
+
+      const { data, error } = await supabase
+        .from("admission_team")
+        .select("*")
+        .eq("email", values.email)
+        .eq("password", values.password)
+        .single();
+
+      if (error || !data) {
+        toast({
+          title: "Authentication Failed",
+          description: "Invalid email or password",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Store user session
+      localStorage.setItem("user", JSON.stringify(data));
+      
+      toast({
+        title: "Welcome back!",
+        description: "Successfully logged in",
+      });
+
+      // Redirect to dashboard
+      router.push("/dashboard");
+      router.refresh();
+
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to sign in with Google",
+        description: "An error occurred during login",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -54,25 +102,60 @@ export default function LoginPage() {
               priority
             />
           </div>
-          <CardTitle className="text-2xl font-bold">Welcome to Blackstone Board</CardTitle>
+          <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
           <CardDescription>
-            Sign in with your @bsolpk.org email to access the admission management system
+            Sign in to manage your admission pipeline
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex justify-center">
-          <Button
-            onClick={handleLogin}
-            className="w-full max-w-sm flex items-center justify-center gap-2"
-          >
-            <Image
-              src="/google.svg"
-              alt="Google Logo"
-              width={20}
-              height={20}
-              className="mr-2"
-            />
-            Sign in with Google
-          </Button>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Enter your email" 
+                        {...field} 
+                        disabled={isLoading}
+                        className="bg-white"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="password" 
+                        placeholder="Enter your password" 
+                        {...field} 
+                        disabled={isLoading}
+                        className="bg-white"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? "Signing in..." : "Sign in"}
+              </Button>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>
