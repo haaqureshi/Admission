@@ -17,9 +17,9 @@ export async function GET(request: Request) {
     }
 
     // Use a relative URL for redirection
-    return NextResponse.redirect(new URL('/dashboard', requestUrl.origin));
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   } catch (error) {
     console.error('Auth callback error:', error);
-    return NextResponse.redirect(new URL('/login?error=auth', requestUrl.origin));
+    return NextResponse.redirect(new URL('/login?error=auth', request.url));
   }
 }
