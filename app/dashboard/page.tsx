@@ -1,6 +1,8 @@
 "use client";
 
-import dynamic from 'next/dynamic';
+import { useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 import { DataTable } from "@/components/data-table";
 import { columns } from "@/components/columns";
 import { Card } from "@/components/ui/card";
@@ -12,13 +14,10 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
 import { Lead } from "@/components/columns";
-import { useState, useEffect, Suspense } from "react";
 import { signOut } from "@/lib/auth";
-import { useRouter } from "next/navigation";
+import dynamic from 'next/dynamic';
 
-// Dynamically import MetricsDashboard with SSR disabled
 const MetricsDashboard = dynamic(
   () => import("@/components/metrics-dashboard"),
   { ssr: false }
@@ -32,14 +31,32 @@ export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
   const { toast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+    const handleInitialAuth = async () => {
+      const code = searchParams.get('code');
+      if (code) {
+        try {
+          const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error) throw error;
+          if (session) {
+            setUser(session.user);
+            router.replace('/dashboard'); // Remove code from URL
+          }
+        } catch (error) {
+          console.error('Error exchanging code:', error);
+          router.push('/login?error=auth');
+        }
+      } else {
+        // Check existing session
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+      }
     };
-    getUser();
-  }, []);
+
+    handleInitialAuth();
+  }, [searchParams, router]);
 
   const handleLogout = async () => {
     try {

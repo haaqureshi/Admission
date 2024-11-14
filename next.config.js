@@ -6,8 +6,12 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'admission.blackstoneboard.com',
+        hostname: 'images.unsplash.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'admission.blackstoneboard.com',
+      }
     ],
   },
   eslint: {
