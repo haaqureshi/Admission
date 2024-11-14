@@ -15,33 +15,41 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { Lead } from "@/components/columns";
 import { useState, useEffect } from "react";
+import { signOut } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
 export default function Dashboard() {
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [user, setUser] = useState<any>(null);
   const { toast } = useToast();
-  const [refreshKey, setRefreshKey] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      setUser(JSON.parse(userData));
-    } else {
-      router.push("/login");
-    }
-  }, [router]);
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    router.push("/login");
-    toast({
-      title: "Logged out",
-      description: "Successfully signed out",
-    });
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      router.push('/login');
+      toast({
+        title: "Logged out",
+        description: "Successfully signed out",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive",
+      });
+    }
   };
 
   const fetchLeads = async () => {
@@ -122,7 +130,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-primary">Blackstone Board</h1>
-                <p className="text-sm text-muted-foreground">Welcome, {user.name}</p>
+                <p className="text-sm text-muted-foreground">Welcome, {user.email}</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
