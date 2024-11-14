@@ -1,8 +1,10 @@
 "use client";
 
-import { ConversionMetrics } from "@/components/metrics/conversion-metrics";
-import { ProgramMetrics } from "@/components/metrics/program-metrics";
-import { StatusMetrics } from "@/components/metrics/status-metrics";
+import dynamic from 'next/dynamic';
+
+const ConversionMetrics = dynamic(() => import("./metrics/conversion-metrics").then(mod => mod.ConversionMetrics), { ssr: false });
+const ProgramMetrics = dynamic(() => import("./metrics/program-metrics").then(mod => mod.ProgramMetrics), { ssr: false });
+const StatusMetrics = dynamic(() => import("./metrics/status-metrics").then(mod => mod.StatusMetrics), { ssr: false });
 
 export function MetricsDashboard() {
   return (
@@ -15,3 +17,5 @@ export function MetricsDashboard() {
     </div>
   );
 }
+
+export default MetricsDashboard;

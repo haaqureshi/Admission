@@ -1,9 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  output: 'standalone',
   images: { 
     unoptimized: true,
     remotePatterns: [
@@ -13,6 +10,13 @@ const nextConfig = {
       },
     ],
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  // Add experimental features for edge runtime
+  experimental: {
+    serverActions: true,
+  }
 };
 
 module.exports = nextConfig;

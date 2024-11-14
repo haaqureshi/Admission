@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from 'next/dynamic';
 import { DataTable } from "@/components/data-table";
 import { columns } from "@/components/columns";
 import { Card } from "@/components/ui/card";
@@ -9,14 +10,19 @@ import { AddLeadDialog } from "@/components/add-lead-dialog";
 import { StatusCard } from "@/components/status-card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MetricsDashboard } from "@/components/metrics-dashboard";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { Lead } from "@/components/columns";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { signOut } from "@/lib/auth";
 import { useRouter } from "next/navigation";
+
+// Dynamically import MetricsDashboard with SSR disabled
+const MetricsDashboard = dynamic(
+  () => import("@/components/metrics-dashboard").then(mod => mod.MetricsDashboard),
+  { ssr: false }
+);
 
 export default function Dashboard() {
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
@@ -279,7 +285,9 @@ export default function Dashboard() {
 
           <TabsContent value="reporting">
             <Card className="p-6">
-              <MetricsDashboard />
+              <Suspense fallback={<div>Loading metrics...</div>}>
+                <MetricsDashboard />
+              </Suspense>
             </Card>
           </TabsContent>
         </Tabs>

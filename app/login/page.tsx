@@ -13,10 +13,17 @@ export default function LoginPage() {
   const { toast } = useToast();
   
   useEffect(() => {
-    if (searchParams.get('error') === 'domain') {
+    const error = searchParams.get('error');
+    if (error === 'domain') {
       toast({
         title: "Access Denied",
         description: "Only @bsolpk.org email addresses are allowed",
+        variant: "destructive",
+      });
+    } else if (error === 'auth') {
+      toast({
+        title: "Authentication Error",
+        description: "There was a problem signing you in. Please try again.",
         variant: "destructive",
       });
     }
