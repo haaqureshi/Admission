@@ -20,7 +20,7 @@ import { useRouter } from "next/navigation";
 
 // Dynamically import MetricsDashboard with SSR disabled
 const MetricsDashboard = dynamic(
-  () => import("@/components/metrics-dashboard").then(mod => mod.MetricsDashboard),
+  () => import("@/components/metrics-dashboard"),
   { ssr: false }
 );
 
@@ -285,9 +285,7 @@ export default function Dashboard() {
 
           <TabsContent value="reporting">
             <Card className="p-6">
-              <Suspense fallback={<div>Loading metrics...</div>}>
-                <MetricsDashboard />
-              </Suspense>
+              <MetricsDashboard />
             </Card>
           </TabsContent>
         </Tabs>
