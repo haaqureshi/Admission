@@ -112,16 +112,16 @@ export function DataTable<TData, TValue>({
       <div className="flex items-center gap-4 py-4 flex-wrap">
         <Input
           placeholder="Search leads..."
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          value={(table.getColumn("basicInfo")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
+            table.getColumn("basicInfo")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
         <Select
-          value={(table.getColumn("program")?.getFilterValue() as string) ?? "all"}
+          value={(table.getColumn("basicInfo")?.getFilterValue() as string) ?? "all"}
           onValueChange={(value) =>
-            table.getColumn("program")?.setFilterValue(value === "all" ? "" : value)
+            table.getColumn("basicInfo")?.setFilterValue(value === "all" ? "" : value)
           }
         >
           <SelectTrigger className="w-[180px]">
@@ -136,9 +136,9 @@ export function DataTable<TData, TValue>({
           </SelectContent>
         </Select>
         <Select
-          value={(table.getColumn("Assign To")?.getFilterValue() as string) ?? "all"}
+          value={(table.getColumn("statusAndFollowup")?.getFilterValue() as string) ?? "all"}
           onValueChange={(value) =>
-            table.getColumn("Assign To")?.setFilterValue(value === "all" ? "" : value)
+            table.getColumn("statusAndFollowup")?.setFilterValue(value === "all" ? "" : value)
           }
         >
           <SelectTrigger className="w-[180px]">
@@ -193,11 +193,13 @@ export function DataTable<TData, TValue>({
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+                    <TableCell key={cell.id} className="align-top">
+                      <div className="grid grid-cols-1 gap-4">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </div>
                     </TableCell>
                   ))}
                 </TableRow>
