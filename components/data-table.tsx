@@ -50,7 +50,18 @@ interface DataTableProps<TData, TValue> {
   };
 }
 
-export function DataTable<TData, TValue>({
+type Lead = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  program?: string;
+  status?: string;
+  "Assign To"?: string;
+  follow_up_date?: string;
+};
+
+export function DataTable<TData extends Lead, TValue>({
   columns,
   data,
   meta,
@@ -58,9 +69,12 @@ export function DataTable<TData, TValue>({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [followUpFilter, setFollowUpFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [programFilter, setProgramFilter] = useState("all");
+  const [assigneeFilter, setAssigneeFilter] = useState("all");
   const [pageSize] = useState(10);
 
-  const filterFollowUps = useMemo(() => (row: any) => {
+  const filterFollowUps = (row: TData) => {
     const followUpDate = row.follow_up_date ? new Date(row.follow_up_date) : null;
     const today = startOfToday();
 
@@ -80,12 +94,32 @@ export function DataTable<TData, TValue>({
       default:
         return true;
     }
-  }, [followUpFilter]);
+  };
 
-  const filteredData = useMemo(() => 
-    data.filter(filterFollowUps),
-    [data, filterFollowUps]
-  );
+  const filteredData = useMemo(() => {
+    return data.filter(row => {
+      // Search filter
+      const searchMatches = searchQuery.trim() === "" || 
+        Object.entries(row).some(([key, value]) => {
+          // Only search through specific fields
+          if (["name", "email", "phone"].includes(key)) {
+            return String(value).toLowerCase().includes(searchQuery.toLowerCase());
+          }
+          return false;
+        });
+
+      // Program filter
+      const programMatches = programFilter === "all" || row.program === programFilter;
+
+      // Assignee filter
+      const assigneeMatches = assigneeFilter === "all" || row["Assign To"] === assigneeFilter;
+
+      // Follow-up filter
+      const followUpMatches = filterFollowUps(row);
+
+      return searchMatches && programMatches && assigneeMatches && followUpMatches;
+    });
+  }, [data, searchQuery, programFilter, assigneeFilter, followUpFilter]);
 
   const table = useReactTable({
     data: filteredData,
@@ -111,18 +145,14 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="flex items-center gap-4 py-4 flex-wrap">
         <Input
-          placeholder="Search leads..."
-          value={(table.getColumn("basicInfo")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("basicInfo")?.setFilterValue(event.target.value)
-          }
+          placeholder="Search by name, email, or phone..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
           className="max-w-sm"
         />
         <Select
-          value={(table.getColumn("basicInfo")?.getFilterValue() as string) ?? "all"}
-          onValueChange={(value) =>
-            table.getColumn("basicInfo")?.setFilterValue(value === "all" ? "" : value)
-          }
+          value={programFilter}
+          onValueChange={setProgramFilter}
         >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="All Programs" />
@@ -136,10 +166,8 @@ export function DataTable<TData, TValue>({
           </SelectContent>
         </Select>
         <Select
-          value={(table.getColumn("statusAndFollowup")?.getFilterValue() as string) ?? "all"}
-          onValueChange={(value) =>
-            table.getColumn("statusAndFollowup")?.setFilterValue(value === "all" ? "" : value)
-          }
+          value={assigneeFilter}
+          onValueChange={setAssigneeFilter}
         >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="All Assignees" />
