@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -146,19 +144,16 @@ export const columns: ColumnDef<Lead>[] = [
 
       return (
         <Card className="w-full">
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Basic Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-2 py-3">
             {/* Name Field */}
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Name</div>
+            <div className="space-y-1">
+              <div className="text-xs font-medium text-muted-foreground">Name</div>
               {isEditingName ? (
                 <div className="flex items-center gap-2">
                   <Input
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="h-8"
+                    className="h-7 text-sm"
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') handleSaveName();
@@ -171,45 +166,45 @@ export const columns: ColumnDef<Lead>[] = [
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-7 w-7"
                     onClick={handleSaveName}
                   >
-                    <Check className="h-4 w-4 text-green-600" />
+                    <Check className="h-3 w-3 text-green-600" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-7 w-7"
                     onClick={() => {
                       setIsEditingName(false);
                       setName(lead.name);
                     }}
                   >
-                    <X className="h-4 w-4 text-red-600" />
+                    <X className="h-3 w-3 text-red-600" />
                   </Button>
                 </div>
               ) : (
                 <Button
                   variant="ghost"
-                  className="flex items-center gap-2 p-0 h-8"
+                  className="flex items-center gap-2 p-0 h-7"
                   onClick={() => setIsEditingName(true)}
                 >
-                  <User className="h-4 w-4" />
-                  {name}
+                  <User className="h-3 w-3" />
+                  <span className="text-sm">{name}</span>
                 </Button>
               )}
             </div>
 
             {/* Education Field */}
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Education</div>
+            <div className="space-y-1">
+              <div className="text-xs font-medium text-muted-foreground">Education</div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-8 px-2 hover:bg-accent">
+                  <Button variant="ghost" className="h-7 px-2 hover:bg-accent">
                     <Badge 
                       variant="outline" 
                       className={cn(
-                        "cursor-pointer flex gap-1 items-center",
+                        "cursor-pointer flex gap-1 items-center text-xs py-0 px-2",
                         {
                           "bg-blue-100 text-blue-800": lead.education === "Bachelors",
                           "bg-purple-100 text-purple-800": lead.education === "Masters",
@@ -242,17 +237,15 @@ export const columns: ColumnDef<Lead>[] = [
             </div>
 
             {/* Date of Birth Field */}
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Date of Birth</div>
+            <div className="space-y-1">
+              <div className="text-xs font-medium text-muted-foreground">Date of Birth</div>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 h-8 p-0">
-                    <CalendarDays className="h-4 w-4" />
-                    {lead.dob ? (
-                      format(new Date(lead.dob), "MMM dd, yyyy")
-                    ) : (
-                      "Set date of birth"
-                    )}
+                  <Button variant="ghost" className="flex items-center gap-2 h-7 p-0">
+                    <CalendarDays className="h-3 w-3" />
+                    <span className="text-sm">
+                      {lead.dob ? format(new Date(lead.dob), "MMM dd, yyyy") : "Set date of birth"}
+                    </span>
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -273,15 +266,15 @@ export const columns: ColumnDef<Lead>[] = [
             </div>
 
             {/* Program Field */}
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Program</div>
+            <div className="space-y-1">
+              <div className="text-xs font-medium text-muted-foreground">Program</div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-8 px-2 hover:bg-accent">
+                  <Button variant="ghost" className="h-7 px-2 hover:bg-accent">
                     <Badge 
                       variant="outline" 
                       className={cn(
-                        "cursor-pointer flex gap-1 items-center",
+                        "cursor-pointer flex gap-1 items-center text-xs py-0 px-2",
                         {
                           "bg-blue-100 text-blue-800": lead.program === "LLB (Hons)",
                           "bg-emerald-100 text-emerald-800": lead.program === "LLM Corporate",
@@ -350,20 +343,17 @@ export const columns: ColumnDef<Lead>[] = [
 
       return (
         <Card className="w-full">
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Contact Details</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-2 py-3">
             {/* Email Field */}
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Email</div>
+            <div className="space-y-1">
+              <div className="text-xs font-medium text-muted-foreground">Email</div>
               {isEditingEmail ? (
                 <div className="flex items-center gap-2">
                   <Input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="h-8"
+                    className="h-7 text-sm"
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') handleSaveEmail();
@@ -376,44 +366,44 @@ export const columns: ColumnDef<Lead>[] = [
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-7 w-7"
                     onClick={handleSaveEmail}
                   >
-                    <Check className="h-4 w-4 text-green-600" />
+                    <Check className="h-3 w-3 text-green-600" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-7 w-7"
                     onClick={() => {
                       setIsEditingEmail(false);
                       setEmail(lead.email);
                     }}
                   >
-                    <X className="h-4 w-4 text-red-600" />
+                    <X className="h-3 w-3 text-red-600" />
                   </Button>
                 </div>
               ) : (
                 <Button
                   variant="ghost"
-                  className="flex items-center gap-2 p-0 h-8"
+                  className="flex items-center gap-2 p-0 h-7"
                   onClick={() => setIsEditingEmail(true)}
                 >
-                  <Mail className="h-4 w-4" />
-                  {email}
+                  <Mail className="h-3 w-3" />
+                  <span className="text-sm">{email}</span>
                 </Button>
               )}
             </div>
 
             {/* Phone Field */}
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Phone</div>
+            <div className="space-y-1">
+              <div className="text-xs font-medium text-muted-foreground">Phone</div>
               {isEditingPhone ? (
                 <div className="flex items-center gap-2">
                   <Input
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="h-8"
+                    className="h-7 text-sm"
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') handleSavePhone();
@@ -426,45 +416,45 @@ export const columns: ColumnDef<Lead>[] = [
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-7 w-7"
                     onClick={handleSavePhone}
                   >
-                    <Check className="h-4 w-4 text-green-600" />
+                    <Check className="h-3 w-3 text-green-600" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-7 w-7"
                     onClick={() => {
                       setIsEditingPhone(false);
                       setPhone(lead.phone);
                     }}
                   >
-                    <X className="h-4 w-4 text-red-600" />
+                    <X className="h-3 w-3 text-red-600" />
                   </Button>
                 </div>
               ) : (
                 <Button
                   variant="ghost"
-                  className="flex items-center gap-2 p-0 h-8"
+                  className="flex items-center gap-2 p-0 h-7"
                   onClick={() => setIsEditingPhone(true)}
                 >
-                  <Phone className="h-4 w-4" />
-                  {phone}
+                  <Phone className="h-3 w-3" />
+                  <span className="text-sm">{phone}</span>
                 </Button>
               )}
             </div>
 
             {/* Source Field */}
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Source</div>
+            <div className="space-y-1">
+              <div className="text-xs font-medium text-muted-foreground">Source</div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-8 px-2 hover:bg-accent">
+                  <Button variant="ghost" className="h-7 px-2 hover:bg-accent">
                     <Badge 
                       variant="outline" 
                       className={cn(
-                        "cursor-pointer flex gap-1 items-center",
+                        "cursor-pointer flex gap-1 items-center text-xs py-0 px-2",
                         {
                           "bg-blue-100 text-blue-800": lead.source === "Facebook",
                           "bg-pink-100 text-pink-800": lead.source === "Instagram",
@@ -507,22 +497,22 @@ export const columns: ColumnDef<Lead>[] = [
             </div>
 
             {/* Communication Channel Field */}
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Communication Channel</div>
+            <div className="space-y-1">
+              <div className="text-xs font-medium text-muted-foreground">Communication Channel</div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 h-8">
+                  <Button variant="ghost" className="flex items-center gap-2 h-7">
                     {lead.communication ? (
                       <>
-                        {lead.communication === "Phone" && <Phone className="h-4 w-4 text-blue-500" />}
-                        {lead.communication === "WhatsApp" && <MessageSquare className="h-4 w-4 text-green-500" />}
-                        {lead.communication === "Email" && <Mail className="h-4 w-4 text-orange-500" />}
-                        {lead.communication === "SMS" && <MessageCircle className="h-4 w-4 text-purple-500" />}
-                        {lead.communication === "Meeting" && <Users className="h-4 w-4 text-indigo-500" />}
-                        {lead.communication}
+                        {lead.communication === "Phone" && <Phone className="h-3 w-3 text-blue-500" />}
+                        {lead.communication === "WhatsApp" && <MessageSquare className="h-3 w-3 text-green-500" />}
+                        {lead.communication === "Email" && <Mail className="h-3 w-3 text-orange-500" />}
+                        {lead.communication === "SMS" && <MessageCircle className="h-3 w-3 text-purple-500" />}
+                        {lead.communication === "Meeting" && <Users className="h-3 w-3 text-indigo-500" />}
+                        <span className="text-sm">{lead.communication}</span>
                       </>
                     ) : (
-                      "Set channel"
+                      <span className="text-sm">Set channel</span>
                     )}
                   </Button>
                 </DropdownMenuTrigger>
@@ -567,27 +557,24 @@ export const columns: ColumnDef<Lead>[] = [
 
       return (
         <Card className="w-full">
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Status & Follow-up</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-2 py-3">
             {/* Assigned To Field */}
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Assigned To</div>
-              <Badge variant="outline" className="h-8">
+            <div className="space-y-1">
+              <div className="text-xs font-medium text-muted-foreground">Assigned To</div>
+              <Badge variant="outline" className="h-7 text-xs">
                 {lead["Assign To"] || "Unassigned"}
               </Badge>
             </div>
 
             {/* Status Field */}
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Status</div>
+            <div className="space-y-1">
+              <div className="text-xs font-medium text-muted-foreground">Status</div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-8 px-2 hover:bg-accent">
+                  <Button variant="ghost" className="h-7 px-2 hover:bg-accent">
                     <Badge 
                       variant={lead.status === "Not Interested" ? "destructive" : "secondary"}
-                      className="cursor-pointer flex gap-1 items-center"
+                      className="cursor-pointer flex gap-1 items-center text-xs py-0 px-2"
                     >
                       {lead.status === "No Contact" && <Clock className="h-3 w-3" />}
                       {lead.status === "Thinking" && <Brain className="h-3 w-3" />}
@@ -644,17 +631,15 @@ export const columns: ColumnDef<Lead>[] = [
             </div>
 
             {/* Follow-up Date Field */}
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Follow-up Date</div>
+            <div className="space-y-1">
+              <div className="text-xs font-medium text-muted-foreground">Follow-up Date</div>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 h-8">
-                    <Calendar className="h-4 w-4" />
-                    {lead.follow_up_date ? (
-                      format(new Date(lead.follow_up_date), "MMM dd, yyyy")
-                    ) : (
-                      "Set follow-up"
-                    )}
+                  <Button variant="ghost" className="flex items-center gap-2 h-7">
+                    <Calendar className="h-3 w-3" />
+                    <span className="text-sm">
+                      {lead.follow_up_date ? format(new Date(lead.follow_up_date), "MMM dd, yyyy") : "Set follow-up"}
+                    </span>
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -673,15 +658,15 @@ export const columns: ColumnDef<Lead>[] = [
             </div>
 
             {/* Pulse Field */}
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Pulse</div>
+            <div className="space-y-1">
+              <div className="text-xs font-medium text-muted-foreground">Pulse</div>
               <Button
                 variant="ghost"
-                className="flex items-center gap-2 h-8 p-0"
+                className="flex items-center gap-2 h-7 p-0"
                 onClick={() => setIsDialogOpen(true)}
               >
-                <Pencil className="h-4 w-4" />
-                {lead.pulse || "Add update"}
+                <Pencil className="h-3 w-3" />
+                <span className="text-sm">{lead.pulse || "Add update"}</span>
               </Button>
               <PulseDialog
                 isOpen={isDialogOpen}
