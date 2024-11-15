@@ -14,7 +14,7 @@ import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { Lead } from "@/components/columns";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 export default function Dashboard() {
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
@@ -23,7 +23,7 @@ export default function Dashboard() {
   const { toast } = useToast();
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const fetchLeads = async () => {
+  const fetchLeads = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('leads')
@@ -42,7 +42,7 @@ export default function Dashboard() {
         variant: "destructive",
       });
     }
-  };
+  }, [toast]);
 
   const refreshData = () => {
     setRefreshKey(prev => prev + 1);
@@ -50,7 +50,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchLeads();
-  }, [refreshKey]);
+  }, [refreshKey, fetchLeads]);
 
   useEffect(() => {
     const channel = supabase

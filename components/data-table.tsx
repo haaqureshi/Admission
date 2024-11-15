@@ -28,7 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { format, isToday, isTomorrow, isThisWeek, isAfter, isBefore, startOfToday } from "date-fns";
 
 interface DataTableProps<TData, TValue> {
@@ -74,7 +74,7 @@ export function DataTable<TData extends Lead, TValue>({
   const [assigneeFilter, setAssigneeFilter] = useState("all");
   const [pageSize] = useState(10);
 
-  const filterFollowUps = (row: TData) => {
+  const filterFollowUps = useCallback((row: TData) => {
     const followUpDate = row.follow_up_date ? new Date(row.follow_up_date) : null;
     const today = startOfToday();
 
@@ -94,32 +94,25 @@ export function DataTable<TData extends Lead, TValue>({
       default:
         return true;
     }
-  };
+  }, [followUpFilter]);
 
   const filteredData = useMemo(() => {
     return data.filter(row => {
-      // Search filter
       const searchMatches = searchQuery.trim() === "" || 
         Object.entries(row).some(([key, value]) => {
-          // Only search through specific fields
           if (["name", "email", "phone"].includes(key)) {
             return String(value).toLowerCase().includes(searchQuery.toLowerCase());
           }
           return false;
         });
 
-      // Program filter
       const programMatches = programFilter === "all" || row.program === programFilter;
-
-      // Assignee filter
       const assigneeMatches = assigneeFilter === "all" || row["Assign To"] === assigneeFilter;
-
-      // Follow-up filter
       const followUpMatches = filterFollowUps(row);
 
       return searchMatches && programMatches && assigneeMatches && followUpMatches;
     });
-  }, [data, searchQuery, programFilter, assigneeFilter, followUpFilter]);
+  }, [data, searchQuery, programFilter, assigneeFilter, filterFollowUps]);
 
   const table = useReactTable({
     data: filteredData,
