@@ -4,64 +4,19 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useAuth } from "@/components/auth/auth-provider";
 import Image from "next/image";
 import { School } from "lucide-react";
 
 export default function LoginPage() {
+  const { signInWithGoogle, session } = useAuth();
   const router = useRouter();
-  const { toast } = useToast();
-  const supabase = createClientComponentClient();
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        router.push('/dashboard');
-      }
-    };
-
-    checkSession();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        router.push('/dashboard');
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [router, supabase.auth]);
-
-  const handleGoogleSignIn = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          queryParams: {
-            hd: 'bsolpk.org' // Restrict to bsolpk.org domain
-          },
-          redirectTo: `${window.location.origin}/auth/callback`
-        }
-      });
-
-      if (error) {
-        toast({
-          title: "Authentication Failed",
-          description: "Please try again using your BSOL email address",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An error occurred during sign in",
-        variant: "destructive",
-      });
+    if (session) {
+      router.push("/dashboard");
     }
-  };
+  }, [session, router]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -76,15 +31,15 @@ export default function LoginPage() {
               priority
             />
           </div>
-          <CardTitle className="text-2xl font-bold">Welcome to Blackstone Board</CardTitle>
+          <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
           <CardDescription>
-            Sign in with your BSOL email address to manage admissions
+            Sign in with your BSOL email to access the admission management system
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button 
+          <Button
             className="w-full flex items-center justify-center gap-2"
-            onClick={handleGoogleSignIn}
+            onClick={signInWithGoogle}
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
@@ -106,6 +61,9 @@ export default function LoginPage() {
             </svg>
             Sign in with Google
           </Button>
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            Only @bsolpk.org email addresses are allowed
+          </p>
         </CardContent>
       </Card>
     </div>

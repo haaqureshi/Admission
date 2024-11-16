@@ -5,31 +5,30 @@ import type { NextRequest } from 'next/server';
 export async function middleware(request: NextRequest) {
   const res = NextResponse.next();
   const supabase = createMiddlewareClient({ req: request, res });
+  const { data: { session } } = await supabase.auth.getSession();
 
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
+  const isAuthPage = request.nextUrl.pathname === '/login';
+  const isPublicPage = request.nextUrl.pathname === '/';
 
-    // Check if the request is for the login page
-    const isLoginPage = request.nextUrl.pathname === '/login';
-    const isAuthCallback = request.nextUrl.pathname === '/auth/callback';
-    
-    // If user is not authenticated and trying to access protected routes
-    if (!session && !isLoginPage && !isAuthCallback) {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-
-    // If user is authenticated and trying to access login page
-    if (session && isLoginPage) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-
-    return res;
-  } catch (error) {
-    console.error('Middleware auth error:', error);
+  // If user is not authenticated and trying to access protected routes
+  if (!session && !isAuthPage && !isPublicPage) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
+
+  // If user is authenticated but trying to access auth pages
+  if (session && (isAuthPage || isPublicPage)) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
+  // If user is authenticated but doesn't have bsolpk.org email
+  if (session && !session.user.email?.endsWith('@bsolpk.org')) {
+    await supabase.auth.signOut();
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  return res;
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };

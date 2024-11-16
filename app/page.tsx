@@ -1,20 +1,20 @@
-import { redirect } from 'next/navigation';
-import { headers, cookies } from 'next/headers';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+"use client";
 
-export default async function Home() {
-  const supabase = createServerComponentClient({ cookies });
-  
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/auth/auth-provider";
 
+export default function Home() {
+  const router = useRouter();
+  const { session } = useAuth();
+
+  useEffect(() => {
     if (session) {
-      redirect('/dashboard');
+      router.push("/dashboard");
+    } else {
+      router.push("/login");
     }
+  }, [session, router]);
 
-    redirect('/login');
-  } catch (error) {
-    console.error('Auth error:', error);
-    redirect('/login');
-  }
+  return null;
 }
