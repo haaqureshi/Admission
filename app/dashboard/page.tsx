@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { Lead } from "@/components/columns";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/components/auth/auth-provider";
 
 export default function Dashboard() {
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
@@ -22,6 +23,7 @@ export default function Dashboard() {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const { toast } = useToast();
   const [refreshKey, setRefreshKey] = useState(0);
+  const { user } = useAuth();
 
   const fetchLeads = async () => {
     try {
@@ -99,7 +101,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-primary">Blackstone Board</h1>
-                <p className="text-sm text-muted-foreground">Admission Management System</p>
+                <p className="text-sm text-muted-foreground">Welcome, {user?.email}</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
