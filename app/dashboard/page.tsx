@@ -141,7 +141,7 @@ export default function Dashboard() {
           <div className="flex justify-between items-center">
             <TabsList>
               <TabsTrigger value="leads">Leads Management</TabsTrigger>
-              <TabsTrigger value="reporting">Reporting</TabsTrigger>
+              {isTeamLead && <TabsTrigger value="reporting">Reporting</TabsTrigger>}
               {isTeamLead && <TabsTrigger value="team">Team</TabsTrigger>}
             </TabsList>
           </div>
@@ -263,11 +263,13 @@ export default function Dashboard() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="reporting">
-            <Card className="p-6">
-              <MetricsDashboard />
-            </Card>
-          </TabsContent>
+          {isTeamLead && (
+            <TabsContent value="reporting">
+              <Card className="p-6">
+                <MetricsDashboard />
+              </Card>
+            </TabsContent>
+          )}
 
           {isTeamLead && (
             <TabsContent value="team">
