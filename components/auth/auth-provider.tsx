@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Session, User } from "@supabase/supabase-js";
+import { useToast } from "@/hooks/use-toast";
 
 interface AuthContextType {
   user: User | null;
@@ -19,26 +20,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { toast } = useToast();
+
+  const checkTeamMembership = async (email: string) => {
+    const { data: teamMembers, error } = await supabase
+      .from('admission_team')
+      .select('email')
+      .eq('email', email)
+      .single();
+
+    if (error || !teamMembers) {
+      await supabase.auth.signOut();
+      toast({
+        title: "Access Denied",
+        description: "You are not authorized to access this application.",
+        variant: "destructive",
+      });
+      router.push('/login');
+      return false;
+    }
+    return true;
+  };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
+      if (session?.user?.email) {
+        await checkTeamMembership(session.user.email);
+      }
+      
       setLoading(false);
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
 
-      if (session) {
-        if (!session.user.email?.endsWith("@bsolpk.org")) {
-          supabase.auth.signOut();
+      if (session?.user?.email) {
+        if (!session.user.email.endsWith("@bsolpk.org")) {
+          await supabase.auth.signOut();
+          toast({
+            title: "Access Denied",
+            description: "Only @bsolpk.org email addresses are allowed.",
+            variant: "destructive",
+          });
+          router.push('/login');
           return;
         }
-        router.push("/dashboard");
+
+        const isTeamMember = await checkTeamMembership(session.user.email);
+        if (isTeamMember) {
+          router.push("/dashboard");
+        }
       } else {
         router.push("/login");
       }
@@ -52,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       provider: "google",
       options: {
         queryParams: {
-          hd: "bsolpk.org", // Restrict to bsolpk.org domain
+          hd: "bsolpk.org",
           prompt: "select_account"
         },
         redirectTo: `${window.location.origin}/dashboard`
