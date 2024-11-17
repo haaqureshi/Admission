@@ -10,6 +10,7 @@ import { StatusCard } from "@/components/status-card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MetricsDashboard } from "@/components/metrics-dashboard";
+import { TeamEmails } from "@/components/team-emails";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
@@ -124,6 +125,7 @@ export default function Dashboard() {
             <TabsList>
               <TabsTrigger value="leads">Leads Management</TabsTrigger>
               <TabsTrigger value="reporting">Reporting</TabsTrigger>
+              <TabsTrigger value="team">Team</TabsTrigger>
             </TabsList>
           </div>
 
@@ -247,6 +249,12 @@ export default function Dashboard() {
           <TabsContent value="reporting">
             <Card className="p-6">
               <MetricsDashboard />
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="team">
+            <Card className="p-6">
+              <TeamEmails />
             </Card>
           </TabsContent>
         </Tabs>
