@@ -14,6 +14,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/components/auth/auth-provider";
+import { cn } from "@/lib/utils";
 
 interface TeamMember {
   id: string;
@@ -26,6 +28,7 @@ export function TeamEmails() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   const fetchTeamMembers = async () => {
     try {
@@ -127,12 +130,22 @@ export function TeamEmails() {
                   </TableRow>
                 ) : (
                   filteredMembers.map((member) => (
-                    <TableRow key={member.id}>
+                    <TableRow 
+                      key={member.id}
+                      className={cn(
+                        member.email === user?.email && "bg-muted/50"
+                      )}
+                    >
                       <TableCell className="font-medium">{member.role}</TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
                           <Mail className="h-4 w-4 text-muted-foreground" />
-                          <span>{member.email}</span>
+                          <span className={cn(
+                            member.email === user?.email && "font-medium"
+                          )}>
+                            {member.email}
+                            {member.email === user?.email && " (You)"}
+                          </span>
                         </div>
                       </TableCell>
                       <TableCell>
