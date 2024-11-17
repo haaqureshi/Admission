@@ -39,6 +39,13 @@ export function TeamEmails() {
         .order('role');
 
       if (error) throw error;
+
+      // If no team members found with the current user's email, sign out
+      if (data && !data.some(member => member.email === user?.email)) {
+        await supabase.auth.signOut();
+        return;
+      }
+
       setTeamMembers(data || []);
     } catch (error) {
       console.error("Error fetching team members:", error);
@@ -61,7 +68,7 @@ export function TeamEmails() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [user?.email]);
 
   const filteredMembers = teamMembers.filter(member =>
     member.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -139,12 +146,16 @@ export function TeamEmails() {
                       <TableCell className="font-medium">{member.role}</TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
-                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <Mail className={cn(
+                            "h-4 w-4",
+                            member.email === user?.email 
+                              ? "text-primary"
+                              : "text-muted-foreground"
+                          )} />
                           <span className={cn(
                             member.email === user?.email && "font-medium"
                           )}>
                             {member.email}
-                            {member.email === user?.email && " (You)"}
                           </span>
                         </div>
                       </TableCell>

@@ -13,6 +13,10 @@ const nextConfig = {
       },
     ],
   },
+  // Add proper error handling for RSC payload
+  experimental: {
+    fallbackNodePolyfills: false,
+  },
 };
 
 module.exports = nextConfig;
