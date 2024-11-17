@@ -25,6 +25,23 @@ export default function Dashboard() {
   const { toast } = useToast();
   const [refreshKey, setRefreshKey] = useState(0);
   const { user } = useAuth();
+  const [isTeamLead, setIsTeamLead] = useState(false);
+
+  useEffect(() => {
+    const checkTeamLeadRole = async () => {
+      if (user?.email) {
+        const { data } = await supabase
+          .from('admission_team')
+          .select('role')
+          .eq('email', user.email)
+          .single();
+        
+        setIsTeamLead(data?.role === 'team lead');
+      }
+    };
+
+    checkTeamLeadRole();
+  }, [user?.email]);
 
   const fetchLeads = async () => {
     try {
@@ -125,7 +142,7 @@ export default function Dashboard() {
             <TabsList>
               <TabsTrigger value="leads">Leads Management</TabsTrigger>
               <TabsTrigger value="reporting">Reporting</TabsTrigger>
-              <TabsTrigger value="team">Team</TabsTrigger>
+              {isTeamLead && <TabsTrigger value="team">Team</TabsTrigger>}
             </TabsList>
           </div>
 
@@ -252,11 +269,13 @@ export default function Dashboard() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="team">
-            <Card className="p-6">
-              <TeamEmails />
-            </Card>
-          </TabsContent>
+          {isTeamLead && (
+            <TabsContent value="team">
+              <Card className="p-6">
+                <TeamEmails />
+              </Card>
+            </TabsContent>
+          )}
         </Tabs>
       </main>
 
