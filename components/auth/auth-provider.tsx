@@ -21,12 +21,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
 
       if (session) {
         if (!session.user.email?.endsWith("@bsolpk.org")) {
@@ -47,8 +52,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       provider: "google",
       options: {
         queryParams: {
-          hd: "bsolpk.org" // Restrict to bsolpk.org domain
-        }
+          hd: "bsolpk.org", // Restrict to bsolpk.org domain
+          prompt: "select_account"
+        },
+        redirectTo: `${window.location.origin}/dashboard`
       }
     });
   };
