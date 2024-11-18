@@ -3,6 +3,11 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
+  // Skip middleware for /form route
+  if (request.nextUrl.pathname === '/form') {
+    return NextResponse.next();
+  }
+
   const res = NextResponse.next();
   const supabase = createMiddlewareClient({ req: request, res });
   
@@ -20,7 +25,7 @@ export async function middleware(request: NextRequest) {
     }
 
     // If user is authenticated but trying to access auth pages
-    if (session && (isAuthPage || isPublicPage)) {
+    if (session && (isAuthPage || request.nextUrl.pathname === '/')) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
@@ -38,5 +43,15 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - form (public form page)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|form).*)',
+  ],
 };
