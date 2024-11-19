@@ -15,6 +15,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const ALLOWED_DOMAINS = ['bsol-admission.netlify.app', 'admission.blackstoneboard.com'];
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -92,6 +94,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [router, pathname]);
 
   const signInWithGoogle = async () => {
+    const redirectTo = `${window.location.protocol}//${window.location.host}/dashboard`;
+    const currentDomain = window.location.hostname;
+    
+    if (!ALLOWED_DOMAINS.includes(currentDomain)) {
+      toast({
+        title: "Access Denied",
+        description: "Please access the application through the official domain.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -99,7 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           hd: "bsolpk.org",
           prompt: "select_account"
         },
-        redirectTo: `${window.location.origin}/dashboard`
+        redirectTo
       }
     });
   };

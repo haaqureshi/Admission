@@ -15,10 +15,22 @@ export const metadata: Metadata = {
     description: 'Admission management system for Blackstone School of Law',
     url: 'https://admission.blackstoneboard.com',
     siteName: 'Blackstone Board',
+    images: [
+      {
+        url: 'https://admission.blackstoneboard.com/bsol-logo.png',
+        width: 800,
+        height: 600,
+        alt: 'Blackstone Board Logo',
+      },
+    ],
   },
   twitter: {
     title: 'Blackstone Board',
     description: 'Admission management system for Blackstone School of Law',
+    images: ['https://admission.blackstoneboard.com/bsol-logo.png'],
+  },
+  alternates: {
+    canonical: 'https://admission.blackstoneboard.com',
   },
 };
 
