@@ -23,13 +23,19 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-2 flex flex-col items-center text-center">
           <div className="w-20 h-20 relative mb-4">
-            <Image
-              src="/bsol-logo.png"
-              alt="Blackstone Board Logo"
-              fill
-              className="object-contain"
-              priority
-            />
+            <picture>
+              <source srcSet="/bsol-logo.avif" type="image/avif" />
+              <source srcSet="/bsol-logo.webp" type="image/webp" />
+              <Image
+                src="/bsol-logo.png"
+                alt="Blackstone Board Logo"
+                fill
+                className="object-contain"
+                priority
+                sizes="(max-width: 80px) 100vw, 80px"
+                quality={90}
+              />
+            </picture>
           </div>
           <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
           <CardDescription>

@@ -17,17 +17,25 @@ export const metadata: Metadata = {
     siteName: 'Blackstone Board',
     images: [
       {
-        url: 'https://admission.blackstoneboard.com/bsol-logo.png',
+        url: 'https://admission.blackstoneboard.com/bsol-logo.webp',
         width: 800,
         height: 600,
         alt: 'Blackstone Board Logo',
+        type: 'image/webp',
+      },
+      {
+        url: 'https://admission.blackstoneboard.com/bsol-logo.avif',
+        width: 800,
+        height: 600,
+        alt: 'Blackstone Board Logo',
+        type: 'image/avif',
       },
     ],
   },
   twitter: {
     title: 'Blackstone Board',
     description: 'Admission management system for Blackstone School of Law',
-    images: ['https://admission.blackstoneboard.com/bsol-logo.png'],
+    images: ['https://admission.blackstoneboard.com/bsol-logo.webp'],
   },
   alternates: {
     canonical: 'https://admission.blackstoneboard.com',
