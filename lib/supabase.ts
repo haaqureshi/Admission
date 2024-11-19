@@ -15,6 +15,11 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
   },
   db: {
     schema: 'public'
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 10
+    }
   }
 });
 
@@ -36,3 +41,18 @@ export async function fetchLeads() {
     throw error;
   }
 }
+
+// Enable realtime subscription for the leads table
+supabase.channel('custom-all-channel')
+  .on(
+    'postgres_changes',
+    {
+      event: '*',
+      schema: 'public',
+      table: 'leads',
+    },
+    (payload) => {
+      console.log('Change received!', payload);
+    }
+  )
+  .subscribe();

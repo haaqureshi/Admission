@@ -15,7 +15,7 @@ import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { Lead } from "@/components/columns";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
 
 export default function Dashboard() {
@@ -23,27 +23,10 @@ export default function Dashboard() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const { toast } = useToast();
-  const [refreshKey, setRefreshKey] = useState(0);
   const { user } = useAuth();
   const [isTeamLead, setIsTeamLead] = useState(false);
 
-  useEffect(() => {
-    const checkTeamLeadRole = async () => {
-      if (user?.email) {
-        const { data } = await supabase
-          .from('admission_team')
-          .select('role')
-          .eq('email', user.email)
-          .single();
-        
-        setIsTeamLead(data?.role === 'team lead');
-      }
-    };
-
-    checkTeamLeadRole();
-  }, [user?.email]);
-
-  const fetchLeads = async () => {
+  const fetchLeads = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('leads')
@@ -62,35 +45,49 @@ export default function Dashboard() {
         variant: "destructive",
       });
     }
-  };
+  }, [toast]);
 
-  const refreshData = () => {
-    setRefreshKey(prev => prev + 1);
-  };
+  useEffect(() => {
+    const checkTeamLeadRole = async () => {
+      if (user?.email) {
+        const { data } = await supabase
+          .from('admission_team')
+          .select('role')
+          .eq('email', user.email)
+          .single();
+        
+        setIsTeamLead(data?.role === 'team lead');
+      }
+    };
+
+    checkTeamLeadRole();
+  }, [user?.email]);
 
   useEffect(() => {
     fetchLeads();
-  }, [refreshKey]);
 
-  useEffect(() => {
-    const channel = supabase
-      .channel('leads_changes')
-      .on('postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'leads' 
-        }, 
+    const channel = supabase.channel('leads-channel')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'leads'
+        },
         () => {
-          refreshData();
+          fetchLeads();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('Subscribed to leads changes');
+        }
+      });
 
     return () => {
-      supabase.removeChannel(channel);
+      channel.unsubscribe();
     };
-  }, []);
+  }, [fetchLeads]);
 
   const statusData = [
     { label: "No Contact", count: leads.filter(l => l.status === "No Contact").length, color: "bg-gray-500" },
@@ -186,77 +183,77 @@ export default function Dashboard() {
                       .from('leads')
                       .update({ status })
                       .eq('id', id);
-                    if (!error) refreshData();
+                    if (!error) fetchLeads();
                   },
                   updatePulse: async (id: string, pulse: string) => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ pulse })
                       .eq('id', id);
-                    if (!error) refreshData();
+                    if (!error) fetchLeads();
                   },
                   updateName: async (id: string, name: string) => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ name })
                       .eq('id', id);
-                    if (!error) refreshData();
+                    if (!error) fetchLeads();
                   },
                   updatePhone: async (id: string, phone: string) => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ phone })
                       .eq('id', id);
-                    if (!error) refreshData();
+                    if (!error) fetchLeads();
                   },
                   updateEmail: async (id: string, email: string) => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ email })
                       .eq('id', id);
-                    if (!error) refreshData();
+                    if (!error) fetchLeads();
                   },
                   updateDob: async (id: string, dob: string) => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ dob })
                       .eq('id', id);
-                    if (!error) refreshData();
+                    if (!error) fetchLeads();
                   },
                   updateEducation: async (id: string, education: string) => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ education })
                       .eq('id', id);
-                    if (!error) refreshData();
+                    if (!error) fetchLeads();
                   },
                   updateSource: async (id: string, source: string) => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ source })
                       .eq('id', id);
-                    if (!error) refreshData();
+                    if (!error) fetchLeads();
                   },
                   updateProgram: async (id: string, program: string) => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ program })
                       .eq('id', id);
-                    if (!error) refreshData();
+                    if (!error) fetchLeads();
                   },
                   updateFollowUpDate: async (id: string, follow_up_date: string) => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ follow_up_date })
                       .eq('id', id);
-                    if (!error) refreshData();
+                    if (!error) fetchLeads();
                   },
                   updateCommunication: async (id: string, communication: string) => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ communication })
                       .eq('id', id);
-                    if (!error) refreshData();
+                    if (!error) fetchLeads();
                   }
                 }}
               />
@@ -285,7 +282,7 @@ export default function Dashboard() {
         open={isAddLeadOpen} 
         onOpenChange={setIsAddLeadOpen}
         onSuccess={() => {
-          refreshData();
+          fetchLeads();
           setIsAddLeadOpen(false);
         }}
       />
