@@ -30,7 +30,6 @@ import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getNextAssignee } from "@/lib/utils/assignment";
-import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -42,11 +41,15 @@ const formSchema = z.object({
   program: z.string(),
 });
 
+interface SupabaseResponse {
+  data: any;
+  error: any;
+}
+
 export default function PublicForm() {
   const { toast } = useToast();
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -62,17 +65,29 @@ export default function PublicForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (isSubmitting) return; // Prevent double submission
+    
     try {
       setIsSubmitting(true);
+      
+      toast({
+        title: "Processing",
+        description: "Please wait while we submit your application...",
+      });
 
-      // Check if phone number already exists
-      const { data: existingLead } = await supabase
-        .from('leads')
-        .select('id')
-        .eq('phone', values.phone)
-        .single();
+      // Check if phone number already exists - with timeout
+      const checkExisting = await Promise.race([
+        supabase
+          .from('leads')
+          .select('id')
+          .eq('phone', values.phone)
+          .single(),
+        new Promise<SupabaseResponse>((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout checking existing lead')), 5000)
+        )
+      ]) as SupabaseResponse;
 
-      if (existingLead) {
+      if (checkExisting.data) {
         toast({
           title: "Application Already Exists",
           description: "An application with this phone number already exists",
@@ -88,26 +103,36 @@ export default function PublicForm() {
         "Assign To": assignTo
       };
 
-      const { error } = await supabase
-        .from('leads')
-        .insert([leadData]);
+      // Submit with timeout
+      const submission = await Promise.race([
+        supabase
+          .from('leads')
+          .insert([leadData]),
+        new Promise<SupabaseResponse>((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout submitting application')), 8000)
+        )
+      ]) as SupabaseResponse;
 
-      if (error) throw error;
+      if (submission.error) throw submission.error;
 
       toast({
         title: "Success",
-        description: "Your application has been submitted successfully. Redirecting...",
+        description: "Application submitted successfully! Redirecting to BSOL website...",
       });
 
-      // Wait for 2 seconds to show the success message before redirecting
+      // Immediate form reset
+      form.reset();
+
+      // Redirect after a brief delay
       setTimeout(() => {
-        window.location.href = "https://bsolpk.org/";
-      }, 1000);
+        window.location.href = 'https://bsolpk.org/';
+      }, 1500);
 
     } catch (error) {
+      console.error('Submission error:', error);
       toast({
         title: "Error",
-        description: "Failed to submit application",
+        description: "Failed to submit application. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -131,7 +156,11 @@ export default function PublicForm() {
                   <FormItem>
                     <FormLabel>Full Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="John Doe" {...field} />
+                      <Input 
+                        placeholder="John Doe" 
+                        {...field} 
+                        disabled={isSubmitting}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -144,7 +173,11 @@ export default function PublicForm() {
                   <FormItem>
                     <FormLabel>Date of Birth</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input 
+                        type="date" 
+                        {...field} 
+                        disabled={isSubmitting}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -157,7 +190,11 @@ export default function PublicForm() {
                   <FormItem>
                     <FormLabel>Phone Number</FormLabel>
                     <FormControl>
-                      <Input placeholder="+1234567890" {...field} />
+                      <Input 
+                        placeholder="+1234567890" 
+                        {...field} 
+                        disabled={isSubmitting}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -169,7 +206,11 @@ export default function PublicForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Education</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                      disabled={isSubmitting}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select education level" />
@@ -192,7 +233,12 @@ export default function PublicForm() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="john@example.com" {...field} />
+                      <Input 
+                        type="email" 
+                        placeholder="john@example.com" 
+                        {...field} 
+                        disabled={isSubmitting}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -204,7 +250,11 @@ export default function PublicForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>How did you hear about us?</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                      disabled={isSubmitting}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select source" />
@@ -228,7 +278,11 @@ export default function PublicForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Program of Interest</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                      disabled={isSubmitting}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select program" />
@@ -245,11 +299,15 @@ export default function PublicForm() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Submitting Application...
+                    Please wait...
                   </>
                 ) : (
                   "Submit Application"
