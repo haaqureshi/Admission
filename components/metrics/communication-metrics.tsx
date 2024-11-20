@@ -18,24 +18,38 @@ import {
   Line,
   Legend
 } from "recharts";
-import { format, startOfMonth, endOfMonth, eachMonthOfInterval, subMonths } from "date-fns";
+import { 
+  format, 
+  startOfMonth, 
+  endOfMonth, 
+  eachMonthOfInterval, 
+  subMonths,
+  parseISO,
+  differenceInMinutes
+} from "date-fns";
+
+interface ChannelStats {
+  channel: string;
+  totalLeads: number;
+  successfulLeads: number;
+  successRate: number;
+}
+
+interface MonthlyStats {
+  month: string;
+  [key: string]: string | number;
+}
+
+interface ResponseRate {
+  channel: string;
+  averageResponseTime: number;
+  responseRate: number;
+}
 
 interface CommunicationMetrics {
-  channelStats: {
-    channel: string;
-    totalLeads: number;
-    successfulLeads: number;
-    successRate: number;
-  }[];
-  monthlyStats: {
-    month: string;
-    [key: string]: string | number;
-  }[];
-  responseRates: {
-    channel: string;
-    averageResponseTime: number;
-    responseRate: number;
-  }[];
+  channelStats: ChannelStats[];
+  monthlyStats: MonthlyStats[];
+  responseRates: ResponseRate[];
 }
 
 const COLORS = [
@@ -72,20 +86,32 @@ export function CommunicationMetrics() {
             channel,
             totalLeads: 0,
             successfulLeads: 0,
+            responseTimes: []
           };
         }
 
         acc[channel].totalLeads++;
+
         if (lead.status === "Won") {
           acc[channel].successfulLeads++;
+        }
+
+        if (lead.pulse) {
+          const responseTime = differenceInMinutes(
+            parseISO(lead.updated_at),
+            parseISO(lead.created_at)
+          );
+          acc[channel].responseTimes.push(responseTime);
         }
 
         return acc;
       }, {});
 
-      const channelStats = Object.values(channelData).map((stat: any) => ({
-        ...stat,
-        successRate: (stat.successfulLeads / stat.totalLeads) * 100
+      const channelStats = Object.values(channelData).map((data: any) => ({
+        channel: data.channel,
+        totalLeads: data.totalLeads,
+        successfulLeads: data.successfulLeads,
+        successRate: (data.successfulLeads / data.totalLeads) * 100
       }));
 
       // Calculate monthly trends
@@ -98,17 +124,17 @@ export function CommunicationMetrics() {
         const monthStart = startOfMonth(month);
         const monthEnd = endOfMonth(month);
         
-        const monthData: Record<string, any> = {
+        const monthData: MonthlyStats = {
           month: format(month, 'MMM yyyy')
         };
 
         Object.keys(channelData).forEach(channel => {
           const monthLeads = leads.filter(lead => {
-            const createdDate = new Date(lead.created_at);
+            const leadDate = parseISO(lead.created_at);
             return (
               lead.communication === channel &&
-              createdDate >= monthStart &&
-              createdDate <= monthEnd &&
+              leadDate >= monthStart &&
+              leadDate <= monthEnd &&
               lead.status === "Won"
             );
           });
@@ -120,30 +146,13 @@ export function CommunicationMetrics() {
       });
 
       // Calculate response rates
-      const responseRates = Object.keys(channelData).map(channel => {
-        const channelLeads = leads.filter(lead => lead.communication === channel);
-        const responseTimes = channelLeads
-          .filter(lead => lead.pulse)
-          .map(lead => {
-            const created = new Date(lead.created_at);
-            const updated = new Date(lead.updated_at);
-            return (updated.getTime() - created.getTime()) / (1000 * 60); // minutes
-          });
-
-        const averageResponseTime = responseTimes.length > 0
-          ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length
-          : 0;
-
-        const responseRate = channelLeads.length > 0
-          ? (responseTimes.length / channelLeads.length) * 100
-          : 0;
-
-        return {
-          channel,
-          averageResponseTime,
-          responseRate
-        };
-      });
+      const responseRates = Object.values(channelData).map((data: any) => ({
+        channel: data.channel,
+        averageResponseTime: data.responseTimes.length > 0
+          ? data.responseTimes.reduce((a: number, b: number) => a + b, 0) / data.responseTimes.length
+          : 0,
+        responseRate: (data.responseTimes.length / data.totalLeads) * 100
+      }));
 
       setMetrics({
         channelStats,
@@ -172,6 +181,13 @@ export function CommunicationMetrics() {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  const formatDuration = (minutes: number) => {
+    if (minutes < 60) {
+      return `${Math.round(minutes)} mins`;
+    }
+    return `${(minutes / 60).toFixed(1)} hrs`;
+  };
 
   if (loading) {
     return <div>Loading communication metrics...</div>;
@@ -228,10 +244,7 @@ export function CommunicationMetrics() {
                   }
                 >
                   {metrics.channelStats.map((_, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={COLORS[index % COLORS.length]} 
-                    />
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -241,7 +254,7 @@ export function CommunicationMetrics() {
           </CardContent>
         </Card>
 
-        {/* Monthly Performance Trends */}
+        {/* Monthly Success Trends */}
         <Card className="md:col-span-2">
           <CardHeader>
             <CardTitle>Channel Performance Trends (6 Months)</CardTitle>
@@ -269,30 +282,27 @@ export function CommunicationMetrics() {
           </CardContent>
         </Card>
 
-        {/* Response Rates */}
+        {/* Response Times */}
         <Card className="md:col-span-2">
           <CardHeader>
-            <CardTitle>Channel Response Performance</CardTitle>
+            <CardTitle>Channel Response Times</CardTitle>
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={metrics.responseRates} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" tickFormatter={(value) => `${value}%`} />
+                <XAxis type="number" />
                 <YAxis type="category" dataKey="channel" width={100} />
                 <Tooltip 
-                  formatter={(value: number) => [`${value.toFixed(1)}%`, "Response Rate"]}
+                  formatter={(value: number) => [formatDuration(value), "Avg Response Time"]}
                 />
                 <Bar 
-                  dataKey="responseRate" 
+                  dataKey="averageResponseTime" 
                   fill="hsl(var(--chart-2))"
-                  name="Response Rate"
+                  name="Response Time"
                 >
                   {metrics.responseRates.map((_, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={COLORS[index % COLORS.length]} 
-                    />
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Bar>
               </BarChart>
