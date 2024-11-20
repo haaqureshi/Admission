@@ -108,7 +108,7 @@ export default function Dashboard() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-3">
-              <Logo size="md" />
+              <Logo width={48} height={48} />
               <div>
                 <h1 className="text-2xl font-bold text-primary">Blackstone Board</h1>
                 <p className="text-sm text-muted-foreground">Welcome, {user?.email}</p>

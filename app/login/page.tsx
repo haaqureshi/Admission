@@ -21,7 +21,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-2 flex flex-col items-center text-center">
-          <Logo size="lg" className="mb-4" />
+          <Logo className="mb-4" width={128} height={128} />
           <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
           <CardDescription>
             Sign in with your BSOL email to access the admission management system
