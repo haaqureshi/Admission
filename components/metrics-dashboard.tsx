@@ -6,6 +6,7 @@ import { StatusMetrics } from "@/components/metrics/status-metrics";
 import { ResponseTimeMetrics } from "@/components/metrics/response-time-metrics";
 import { AssigneeMetrics } from "@/components/metrics/assignee-metrics";
 import { SourceMetrics } from "@/components/metrics/source-metrics";
+import { FollowUpMetrics } from "@/components/metrics/follow-up-metrics";
 
 export function MetricsDashboard() {
   return (
@@ -14,6 +15,7 @@ export function MetricsDashboard() {
       <ResponseTimeMetrics />
       <AssigneeMetrics />
       <SourceMetrics />
+      <FollowUpMetrics />
       <div className="grid gap-8 md:grid-cols-2">
         <ProgramMetrics />
         <StatusMetrics />
