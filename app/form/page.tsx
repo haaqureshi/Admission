@@ -27,7 +27,7 @@ import { supabase } from "@/lib/supabase";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getNextAssignee } from "@/lib/utils/assignment";
 import { useRouter } from "next/navigation";
@@ -96,11 +96,14 @@ export default function PublicForm() {
 
       toast({
         title: "Success",
-        description: "Your application has been submitted successfully",
+        description: "Your application has been submitted successfully. Redirecting...",
       });
 
-      // Redirect to BSOL website after successful submission
-      window.location.href = "https://bsolpk.org/";
+      // Wait for 2 seconds to show the success message before redirecting
+      setTimeout(() => {
+        window.location.href = "https://bsolpk.org/";
+      }, 1000);
+
     } catch (error) {
       toast({
         title: "Error",
@@ -243,7 +246,14 @@ export default function PublicForm() {
                 )}
               />
               <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? "Submitting..." : "Submit Application"}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Submitting Application...
+                  </>
+                ) : (
+                  "Submit Application"
+                )}
               </Button>
             </form>
           </Form>
