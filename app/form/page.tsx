@@ -30,6 +30,7 @@ import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getNextAssignee } from "@/lib/utils/assignment";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -45,6 +46,7 @@ export default function PublicForm() {
   const { toast } = useToast();
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -97,7 +99,8 @@ export default function PublicForm() {
         description: "Your application has been submitted successfully",
       });
 
-      form.reset();
+      // Redirect to BSOL website after successful submission
+      window.location.href = "https://bsolpk.org/";
     } catch (error) {
       toast({
         title: "Error",

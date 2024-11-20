@@ -11,7 +11,13 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'admission.blackstoneboard.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'bsol-admission.netlify.app',
+      },
     ],
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60,
   },
   // Add proper error handling for RSC payload
   experimental: {
