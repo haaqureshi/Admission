@@ -26,6 +26,7 @@ export default function Dashboard() {
   const [refreshKey, setRefreshKey] = useState(0);
   const { user } = useAuth();
   const [isTeamLead, setIsTeamLead] = useState(false);
+  const [activeTab, setActiveTab] = useState("leads");
 
   useEffect(() => {
     const checkTeamLeadRole = async () => {
@@ -102,6 +103,11 @@ export default function Dashboard() {
     { label: "Not Affordable", count: leads.filter(l => l.status === "Not Affordable").length, color: "bg-purple-500" },
   ];
 
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    refreshData();
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white border-b">
@@ -129,7 +135,7 @@ export default function Dashboard() {
       </nav>
 
       <main className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="leads" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
           <div className="flex justify-between items-center">
             <TabsList>
               <TabsTrigger value="leads">Leads Management</TabsTrigger>
@@ -257,14 +263,14 @@ export default function Dashboard() {
 
           <TabsContent value="reporting">
             <Card className="p-6">
-              <MetricsDashboard />
+              <MetricsDashboard key={refreshKey} />
             </Card>
           </TabsContent>
 
           {isTeamLead && (
             <TabsContent value="team">
               <Card className="p-6">
-                <TeamEmails />
+                <TeamEmails key={refreshKey} />
               </Card>
             </TabsContent>
           )}
