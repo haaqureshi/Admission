@@ -8,6 +8,7 @@ import { AssigneeMetrics } from "@/components/metrics/assignee-metrics";
 import { SourceMetrics } from "@/components/metrics/source-metrics";
 import { FollowUpMetrics } from "@/components/metrics/follow-up-metrics";
 import { LeadAgingMetrics } from "@/components/metrics/lead-aging-metrics";
+import { CommunicationMetrics } from "@/components/metrics/communication-metrics";
 
 export function MetricsDashboard() {
   return (
@@ -16,6 +17,7 @@ export function MetricsDashboard() {
       <ResponseTimeMetrics />
       <AssigneeMetrics />
       <SourceMetrics />
+      <CommunicationMetrics />
       <FollowUpMetrics />
       <LeadAgingMetrics />
       <div className="grid gap-8 md:grid-cols-2">
