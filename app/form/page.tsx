@@ -70,20 +70,35 @@ export default function PublicForm() {
         description: "Please wait while we submit your application...",
       });
 
-      // Check if phone number already exists
-      const { data: existingLead } = await supabase
+      // Check for duplicate phone and email
+      const { data: existingLeads, error: searchError } = await supabase
         .from('leads')
-        .select('id, name, "Assign To", status')
-        .eq('phone', values.phone)
-        .single();
+        .select('id, name, "Assign To", status, phone, email')
+        .or(`phone.eq.${values.phone},email.eq.${values.email}`);
 
-      if (existingLead) {
-        toast({
-          title: "Application Already Exists",
-          description: `An application for ${existingLead.name} is already being processed by ${existingLead["Assign To"]} (Status: ${existingLead.status})`,
-          variant: "destructive",
-        });
-        return;
+      if (searchError) throw searchError;
+
+      if (existingLeads && existingLeads.length > 0) {
+        const duplicatePhone = existingLeads.find(lead => lead.phone === values.phone);
+        const duplicateEmail = existingLeads.find(lead => lead.email === values.email);
+
+        if (duplicatePhone) {
+          toast({
+            title: "Application Already Exists",
+            description: `An application for ${duplicatePhone.name} is already being processed by ${duplicatePhone["Assign To"]} (Status: ${duplicatePhone.status})`,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (duplicateEmail) {
+          toast({
+            title: "Application Already Exists",
+            description: `An application with this email address is already being processed by ${duplicateEmail["Assign To"]} (Status: ${duplicateEmail.status})`,
+            variant: "destructive",
+          });
+          return;
+        }
       }
 
       const assignTo = getNextAssignee(values.program);
@@ -106,7 +121,6 @@ export default function PublicForm() {
 
       form.reset();
 
-      // Redirect after a brief delay
       setTimeout(() => {
         window.location.href = 'https://bsolpk.org/';
       }, 1500);
