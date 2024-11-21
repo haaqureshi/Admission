@@ -41,11 +41,6 @@ const formSchema = z.object({
   program: z.string(),
 });
 
-interface SupabaseResponse {
-  data: any;
-  error: any;
-}
-
 export default function PublicForm() {
   const { toast } = useToast();
   const [calendarOpen, setCalendarOpen] = useState(false);
@@ -75,22 +70,17 @@ export default function PublicForm() {
         description: "Please wait while we submit your application...",
       });
 
-      // Check if phone number already exists - with timeout
-      const checkExisting = await Promise.race([
-        supabase
-          .from('leads')
-          .select('id')
-          .eq('phone', values.phone)
-          .single(),
-        new Promise<SupabaseResponse>((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout checking existing lead')), 5000)
-        )
-      ]) as SupabaseResponse;
+      // Check if phone number already exists
+      const { data: existingLead } = await supabase
+        .from('leads')
+        .select('id, name, "Assign To", status')
+        .eq('phone', values.phone)
+        .single();
 
-      if (checkExisting.data) {
+      if (existingLead) {
         toast({
           title: "Application Already Exists",
-          description: "An application with this phone number already exists",
+          description: `An application for ${existingLead.name} is already being processed by ${existingLead["Assign To"]} (Status: ${existingLead.status})`,
           variant: "destructive",
         });
         return;
@@ -103,24 +93,17 @@ export default function PublicForm() {
         "Assign To": assignTo
       };
 
-      // Submit with timeout
-      const submission = await Promise.race([
-        supabase
-          .from('leads')
-          .insert([leadData]),
-        new Promise<SupabaseResponse>((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout submitting application')), 8000)
-        )
-      ]) as SupabaseResponse;
+      const { error } = await supabase
+        .from('leads')
+        .insert([leadData]);
 
-      if (submission.error) throw submission.error;
+      if (error) throw error;
 
       toast({
         title: "Success",
         description: "Application submitted successfully! Redirecting to BSOL website...",
       });
 
-      // Immediate form reset
       form.reset();
 
       // Redirect after a brief delay
