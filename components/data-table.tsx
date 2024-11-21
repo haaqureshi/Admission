@@ -28,7 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { format, isToday, isTomorrow, isThisWeek, isAfter, isBefore, startOfToday } from "date-fns";
 
 interface DataTableProps<TData, TValue> {
@@ -73,6 +73,12 @@ export function DataTable<TData extends Lead, TValue>({
   const [programFilter, setProgramFilter] = useState("all");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
   const [pageSize] = useState(10);
+
+  // Reset filters when data changes
+  useEffect(() => {
+    setColumnFilters([]);
+    setSorting([]);
+  }, [data]);
 
   const filterFollowUps = (row: TData) => {
     const followUpDate = row.follow_up_date ? new Date(row.follow_up_date) : null;
@@ -140,6 +146,11 @@ export function DataTable<TData extends Lead, TValue>({
     },
     meta,
   });
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    table.setPageIndex(0);
+  }, [searchQuery, programFilter, assigneeFilter, followUpFilter]);
 
   return (
     <div>
