@@ -65,7 +65,7 @@ export default function PublicForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (isSubmitting) return; // Prevent double submission
+    if (isSubmitting) return;
     
     try {
       setIsSubmitting(true);
