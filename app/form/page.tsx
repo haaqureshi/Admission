@@ -31,10 +31,15 @@ import { CalendarIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getNextAssignee } from "@/lib/utils/assignment";
 
+const phoneRegex = /^(\+\d{1,3}[-.]?)?\d{10,14}$/;
+
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   dob: z.string(),
-  phone: z.string(),
+  phone: z.string()
+    .min(10, "Phone number must be at least 10 digits")
+    .max(15, "Phone number must not exceed 15 digits")
+    .regex(phoneRegex, "Please enter a valid phone number (e.g., +923001234567 or 03001234567)"),
   education: z.string(),
   email: z.string().email("Invalid email address"),
   source: z.string(),
@@ -188,7 +193,7 @@ export default function PublicForm() {
                     <FormLabel>Phone Number</FormLabel>
                     <FormControl>
                       <Input 
-                        placeholder="+1234567890" 
+                        placeholder="+923001234567" 
                         {...field} 
                         disabled={isSubmitting}
                       />

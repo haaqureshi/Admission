@@ -29,15 +29,20 @@ import { supabase } from "@/lib/supabase";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getNextAssignee } from "@/lib/utils/assignment";
 import { useState } from "react";
 
+const phoneRegex = /^(\+\d{1,3}[-.]?)?\d{10,14}$/;
+
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   dob: z.string(),
-  phone: z.string(),
+  phone: z.string()
+    .min(10, "Phone number must be at least 10 digits")
+    .max(15, "Phone number must not exceed 15 digits")
+    .regex(phoneRegex, "Please enter a valid phone number (e.g., +923001234567 or 03001234567)"),
   education: z.string(),
   email: z.string().email("Invalid email address"),
   source: z.string(),
@@ -75,20 +80,35 @@ export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogPr
     try {
       setIsSubmitting(true);
 
-      // Check if phone number already exists
-      const { data: existingLead } = await supabase
+      // Check for duplicate phone and email
+      const { data: existingLeads, error: searchError } = await supabase
         .from('leads')
-        .select('id, name, "Assign To", status')
-        .eq('phone', values.phone)
-        .single();
+        .select('id, name, "Assign To", status, phone, email')
+        .or(`phone.eq.${values.phone},email.eq.${values.email}`);
 
-      if (existingLead) {
-        toast({
-          title: "Application Already Exists",
-          description: `An application for ${existingLead.name} is already being processed by ${existingLead["Assign To"]} (Status: ${existingLead.status})`,
-          variant: "destructive",
-        });
-        return;
+      if (searchError) throw searchError;
+
+      if (existingLeads && existingLeads.length > 0) {
+        const duplicatePhone = existingLeads.find(lead => lead.phone === values.phone);
+        const duplicateEmail = existingLeads.find(lead => lead.email === values.email);
+
+        if (duplicatePhone) {
+          toast({
+            title: "Application Already Exists",
+            description: `An application for ${duplicatePhone.name} is already being processed by ${duplicatePhone["Assign To"]} (Status: ${duplicatePhone.status})`,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (duplicateEmail) {
+          toast({
+            title: "Application Already Exists",
+            description: `An application with this email address is already being processed by ${duplicateEmail["Assign To"]} (Status: ${duplicateEmail.status})`,
+            variant: "destructive",
+          });
+          return;
+        }
       }
 
       const assignTo = getNextAssignee(values.program);
@@ -101,17 +121,15 @@ export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogPr
         .from('leads')
         .insert([leadData]);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       toast({
         title: "Success",
         description: `Lead added successfully and assigned to ${assignTo}`,
       });
 
-      onSuccess();
       form.reset();
+      onSuccess();
       onOpenChange(false);
     } catch (error) {
       toast({
@@ -165,7 +183,7 @@ export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogPr
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="+1234567890" {...field} />
+                    <Input placeholder="+923001234567" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -296,7 +314,14 @@ export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogPr
             />
             <div className="flex justify-end">
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Adding..." : "Add Lead"}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Please wait...
+                  </>
+                ) : (
+                  "Add Lead"
+                )}
               </Button>
             </div>
           </form>
