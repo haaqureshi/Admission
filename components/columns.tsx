@@ -571,12 +571,20 @@ export const columns: ColumnDef<Lead>[] = [
             <CardTitle className="text-sm font-medium">Status & Follow-up</CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0 space-y-2">
-            {/* Assigned To Field */}
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-medium text-muted-foreground">Assigned To:</div>
-              <Badge variant="outline" className="h-8">
-                {lead["Assign To"] || "Unassigned"}
-              </Badge>
+            {/* Assigned To Field with Creation Date */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-medium text-muted-foreground">Assigned To:</div>
+                <Badge variant="outline" className="h-8">
+                  {lead["Assign To"] || "Unassigned"}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-medium text-muted-foreground">Created On:</div>
+                <Badge variant="outline" className="h-8">
+                  {format(new Date(lead.created_at), "MMM dd, yyyy")}
+                </Badge>
+              </div>
             </div>
 
             {/* Status Field */}
