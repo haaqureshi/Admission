@@ -178,7 +178,7 @@ export function DataTable<TData extends Lead, TValue>({
             <SelectItem value="all">All Assignees</SelectItem>
             <SelectItem value="Alvina Sami">Alvina Sami</SelectItem>
             <SelectItem value="Shahzaib Shams">Shahzaib Shams</SelectItem>
-            <SelectItem value="Faiza Ullah">Faiza Ullah</SelectItem>
+            <SelectItem value="Faizan Ullah">Faizan Ullah</SelectItem>
             <SelectItem value="Aneeza Komal">Aneeza Komal</SelectItem>
           </SelectContent>
         </Select>
