@@ -74,7 +74,6 @@ export function DataTable<TData extends Lead, TValue>({
   const [assigneeFilter, setAssigneeFilter] = useState("all");
   const [pageSize] = useState(10);
 
-  // Reset filters when data changes
   useEffect(() => {
     setColumnFilters([]);
     setSorting([]);
@@ -104,23 +103,16 @@ export function DataTable<TData extends Lead, TValue>({
 
   const filteredData = useMemo(() => {
     return data.filter(row => {
-      // Search filter
       const searchMatches = searchQuery.trim() === "" || 
         Object.entries(row).some(([key, value]) => {
-          // Only search through specific fields
           if (["name", "email", "phone"].includes(key)) {
             return String(value).toLowerCase().includes(searchQuery.toLowerCase());
           }
           return false;
         });
 
-      // Program filter
       const programMatches = programFilter === "all" || row.program === programFilter;
-
-      // Assignee filter
       const assigneeMatches = assigneeFilter === "all" || row["Assign To"] === assigneeFilter;
-
-      // Follow-up filter
       const followUpMatches = filterFollowUps(row);
 
       return searchMatches && programMatches && assigneeMatches && followUpMatches;
@@ -147,7 +139,6 @@ export function DataTable<TData extends Lead, TValue>({
     meta,
   });
 
-  // Reset to first page when filters change
   useEffect(() => {
     table.setPageIndex(0);
   }, [searchQuery, programFilter, assigneeFilter, followUpFilter]);
