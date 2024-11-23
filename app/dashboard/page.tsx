@@ -15,8 +15,10 @@ import { Logo } from "@/components/ui/logo";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { Lead } from "@/components/columns";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+
+const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 export default function Dashboard() {
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
@@ -28,23 +30,7 @@ export default function Dashboard() {
   const [userRole, setUserRole] = useState<string>("developer");
   const [activeTab, setActiveTab] = useState("leads");
 
-  useEffect(() => {
-    const checkUserRole = async () => {
-      if (user?.email) {
-        const { data } = await supabase
-          .from('admission_team')
-          .select('role')
-          .eq('email', user.email)
-          .single();
-        
-        setUserRole(data?.role || "developer");
-      }
-    };
-
-    checkUserRole();
-  }, [user?.email]);
-
-  const fetchLeads = async () => {
+  const fetchLeads = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('leads')
@@ -63,17 +49,17 @@ export default function Dashboard() {
         variant: "destructive",
       });
     }
-  };
+  }, [toast]);
 
-  const refreshData = () => {
+  const refreshData = useCallback(() => {
     setRefreshKey(prev => prev + 1);
-  };
+    fetchLeads();
+  }, [fetchLeads]);
 
+  // Initial fetch and real-time updates setup
   useEffect(() => {
     fetchLeads();
-  }, [refreshKey]);
 
-  useEffect(() => {
     const channel = supabase
       .channel('leads_changes')
       .on('postgres_changes', 
@@ -91,7 +77,37 @@ export default function Dashboard() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [fetchLeads, refreshData]);
+
+  // Auto-refresh setup
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      refreshData();
+    }, AUTO_REFRESH_INTERVAL);
+
+    return () => clearInterval(intervalId);
+  }, [refreshData]);
+
+  useEffect(() => {
+    const checkUserRole = async () => {
+      if (user?.email) {
+        const { data } = await supabase
+          .from('admission_team')
+          .select('role')
+          .eq('email', user.email)
+          .single();
+        
+        setUserRole(data?.role || "developer");
+      }
+    };
+
+    checkUserRole();
+  }, [user?.email]);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    refreshData(); // Refresh data when tab changes
+  };
 
   const statusData = [
     { label: "No Contact", count: leads.filter(l => l.status === "No Contact").length, color: "bg-gray-500" },
@@ -102,11 +118,6 @@ export default function Dashboard() {
     { label: "Not Interested", count: leads.filter(l => l.status === "Not Interested").length, color: "bg-red-500" },
     { label: "Not Affordable", count: leads.filter(l => l.status === "Not Affordable").length, color: "bg-purple-500" },
   ];
-
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    refreshData();
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
