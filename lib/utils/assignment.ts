@@ -65,3 +65,20 @@ export function getAssignmentStats(): Record<string, Record<string, number>> {
 
   return stats;
 }
+
+export function resetAssignmentState(): void {
+  assignmentState = {
+    "LLB (Hons)": 0,
+    "LLM Corporate": 0,
+    "LLM Human Rights": 0,
+    "Bar Transfer Course": 0
+  };
+  
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('assignmentState', JSON.stringify(assignmentState));
+  }
+}
+
+export function getTeamMembers(): string[] {
+  return [...teamMembers];
+}
