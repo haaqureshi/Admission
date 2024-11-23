@@ -37,17 +37,17 @@ import { useState } from "react";
 const phoneRegex = /^(\+\d{1,3}[-.]?)?\d{10,14}$/;
 
 const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  dob: z.string(),
+  name: z.string().min(2, "Name must be at least 2 characters").max(100, "Name must not exceed 100 characters"),
+  dob: z.string().min(1, "Date of birth is required"),
   phone: z.string()
     .min(10, "Phone number must be at least 10 digits")
     .max(15, "Phone number must not exceed 15 digits")
     .regex(phoneRegex, "Please enter a valid phone number (e.g., +923001234567 or 03001234567)"),
-  education: z.string(),
-  email: z.string().email("Invalid email address"),
-  source: z.string(),
-  program: z.string(),
-  status: z.string(),
+  education: z.string().min(1, "Education level is required"),
+  email: z.string().email("Invalid email address").min(1, "Email is required"),
+  source: z.string().min(1, "Source is required"),
+  program: z.string().min(1, "Program is required"),
+  status: z.string().min(1, "Status is required"),
   follow_up_date: z.string().optional(),
 });
 
@@ -155,9 +155,9 @@ export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogPr
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Full Name</FormLabel>
+                  <FormLabel>Full Name <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
-                    <Input placeholder="John Doe" {...field} />
+                    <Input placeholder="John Doe" {...field} required />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -168,9 +168,9 @@ export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogPr
               name="dob"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Date of Birth</FormLabel>
+                  <FormLabel>Date of Birth <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Input type="date" {...field} required />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -181,9 +181,9 @@ export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogPr
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone Number</FormLabel>
+                  <FormLabel>Phone Number <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
-                    <Input placeholder="+923001234567" {...field} />
+                    <Input placeholder="+923001234567" {...field} required />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -194,8 +194,8 @@ export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogPr
               name="education"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Education</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormLabel>Education <span className="text-red-500">*</span></FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} required>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select education level" />
@@ -216,9 +216,9 @@ export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogPr
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Email <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="john@example.com" {...field} />
+                    <Input type="email" placeholder="john@example.com" {...field} required />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -229,8 +229,8 @@ export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogPr
               name="source"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Source</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormLabel>Source <span className="text-red-500">*</span></FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} required>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select source" />
@@ -253,8 +253,8 @@ export function AddLeadDialog({ open, onOpenChange, onSuccess }: AddLeadDialogPr
               name="program"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Program</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormLabel>Program <span className="text-red-500">*</span></FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} required>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select program" />
