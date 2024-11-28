@@ -145,7 +145,7 @@ export const columns: ColumnDef<Lead>[] = [
       };
 
       return (
-        <Card className="w-full">
+        <Card className="w-full max-w-md">
           <CardHeader className="p-4">
             <CardTitle className="text-sm font-medium">Basic Information</CardTitle>
           </CardHeader>
@@ -349,7 +349,7 @@ export const columns: ColumnDef<Lead>[] = [
       };
 
       return (
-        <Card className="w-full">
+        <Card className="w-full max-w-md">
           <CardHeader className="p-4">
             <CardTitle className="text-sm font-medium">Contact Details</CardTitle>
           </CardHeader>
@@ -566,7 +566,7 @@ export const columns: ColumnDef<Lead>[] = [
       const [isDialogOpen, setIsDialogOpen] = useState(false);
 
       return (
-        <Card className="w-full">
+        <Card className="w-full max-w-md">
           <CardHeader className="p-4">
             <CardTitle className="text-sm font-medium">Status & Follow-up</CardTitle>
           </CardHeader>
