@@ -110,6 +110,7 @@ export default function Dashboard() {
   };
 
   const statusData = [
+    { label: "All", count: leads.length, color: "bg-gray-300" },
     { label: "No Contact", count: leads.filter(l => l.status === "No Contact").length, color: "bg-gray-500" },
     { label: "Thinking", count: leads.filter(l => l.status === "Thinking").length, color: "bg-yellow-500" },
     { label: "Interested", count: leads.filter(l => l.status === "Interested").length, color: "bg-green-500" },
@@ -118,6 +119,10 @@ export default function Dashboard() {
     { label: "Not Interested", count: leads.filter(l => l.status === "Not Interested").length, color: "bg-red-500" },
     { label: "Not Affordable", count: leads.filter(l => l.status === "Not Affordable").length, color: "bg-purple-500" },
   ];
+
+  const filteredLeads = selectedStatus && selectedStatus !== "All"
+    ? leads.filter(lead => lead.status === selectedStatus)
+    : leads;
 
   const handleUpdate = async (id: string, field: string, value: any) => {
     try {
@@ -209,7 +214,7 @@ export default function Dashboard() {
               </div>
               <DataTable 
                 columns={columns} 
-                data={selectedStatus ? leads.filter(lead => lead.status === selectedStatus) : leads}
+                data={filteredLeads}
                 meta={{
                   updateStatus: async (id: string, status: string) => {
                     const { error } = await supabase
