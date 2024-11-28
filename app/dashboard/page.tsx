@@ -119,6 +119,27 @@ export default function Dashboard() {
     { label: "Not Affordable", count: leads.filter(l => l.status === "Not Affordable").length, color: "bg-purple-500" },
   ];
 
+  const handleUpdate = async (id: string, field: string, value: any) => {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .update({ [field]: value })
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      fetchLeads(); // Re-fetch data after update
+    } catch (error) {
+      toast({
+        title: "Update Error",
+        description: "Failed to update lead.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white border-b">
