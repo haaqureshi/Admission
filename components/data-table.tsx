@@ -73,6 +73,7 @@ export function DataTable<TData extends Lead, TValue>({
   const [programFilter, setProgramFilter] = useState("all");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
   const [pageSize] = useState(10);
+  const [pageIndex, setPageIndex] = useState(0);
 
   useEffect(() => {
     setColumnFilters([]);
@@ -133,15 +134,19 @@ export function DataTable<TData extends Lead, TValue>({
       columnFilters,
       pagination: {
         pageSize,
-        pageIndex: 0,
+        pageIndex,
       },
     },
     meta,
   });
 
   useEffect(() => {
-    table.setPageIndex(0);
+    setPageIndex(0);
   }, [searchQuery, programFilter, assigneeFilter, followUpFilter]);
+
+  // Calculate the range of items being displayed
+  const startItem = pageIndex * pageSize + 1;
+  const endItem = Math.min(startItem + pageSize - 1, filteredData.length);
 
   return (
     <div>
@@ -249,13 +254,16 @@ export function DataTable<TData extends Lead, TValue>({
       </div>
       <div className="flex items-center justify-between space-x-2 py-4">
         <div className="text-sm text-muted-foreground">
-          Showing {filteredData.length} results
+          Showing {startItem}-{endItem} of {filteredData.length} results
         </div>
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.previousPage()}
+            onClick={() => {
+              table.previousPage();
+              setPageIndex((prev) => Math.max(prev - 1, 0));
+            }}
             disabled={!table.getCanPreviousPage()}
           >
             Previous
@@ -263,7 +271,10 @@ export function DataTable<TData extends Lead, TValue>({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.nextPage()}
+            onClick={() => {
+              table.nextPage();
+              setPageIndex((prev) => prev + 1);
+            }}
             disabled={!table.getCanNextPage()}
           >
             Next
