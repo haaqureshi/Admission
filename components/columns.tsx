@@ -560,6 +560,13 @@ export const columns: ColumnDef<Lead>[] = [
   {
     id: "statusAndFollowup",
     header: "Status & Follow-up",
+    accessorKey: "follow_up_date",
+    enableSorting: true,
+    sortingFn: (rowA, rowB, columnId) => {
+      const dateA = rowA.original.follow_up_date ? new Date(rowA.original.follow_up_date).getTime() : 0;
+      const dateB = rowB.original.follow_up_date ? new Date(rowB.original.follow_up_date).getTime() : 0;
+      return dateA - dateB;
+    },
     cell: ({ row, table }) => {
       const lead = row.original;
       const meta = table.options.meta as any;

@@ -30,6 +30,8 @@ import {
 } from "@/components/ui/select";
 import { useState, useMemo, useEffect } from "react";
 import { format, isToday, isTomorrow, isThisWeek, isAfter, isBefore, startOfToday } from "date-fns";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { Calendar, ArrowUpDown, ArrowDown, ArrowUp, X } from "lucide-react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -157,6 +159,32 @@ export function DataTable<TData extends Lead, TValue>({
           onChange={(e) => setSearchQuery(e.target.value)}
           className="max-w-sm"
         />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="w-[220px]">
+              <Calendar className="mr-2 h-4 w-4" />
+              {sorting.find(s => s.id === 'statusAndFollowup')?.desc
+                ? 'Follow-up Date (Desc)'
+                : sorting.find(s => s.id === 'statusAndFollowup')?.desc === false
+                ? 'Follow-up Date (Asc)'
+                : 'Sort by Follow-up Date'}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setSorting([{ id: 'statusAndFollowup', desc: false }])}>
+              <ArrowUp className="mr-2 h-4 w-4" />
+              Ascending
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSorting([{ id: 'statusAndFollowup', desc: true }])}>
+              <ArrowDown className="mr-2 h-4 w-4" />
+              Descending
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSorting([])}>
+              <X className="mr-2 h-4 w-4" />
+              Clear Sort
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <Select
           value={programFilter}
           onValueChange={setProgramFilter}
