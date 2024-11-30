@@ -200,21 +200,24 @@ export function DataTable<TData extends Lead, TValue>({
             <SelectItem value="Bar Transfer Course">Bar Transfer Course</SelectItem>
           </SelectContent>
         </Select>
-        <Select
-          value={assigneeFilter}
-          onValueChange={setAssigneeFilter}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="All Assignees" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Assignees</SelectItem>
-            <SelectItem value="Alvina Sami">Alvina Sami</SelectItem>
-            <SelectItem value="Shahzaib Shams">Shahzaib Shams</SelectItem>
-            <SelectItem value="Faizan Ullah">Faizan Ullah</SelectItem>
-            <SelectItem value="Aneeza Komal">Aneeza Komal</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2">
+          <Select
+            value={assigneeFilter}
+            onValueChange={setAssigneeFilter}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by assignee" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Assignees</SelectItem>
+              <SelectItem value="Abubakr Mahmood">Abubakr Mahmood</SelectItem>
+              <SelectItem value="Faizan Ullah">Faizan Ullah</SelectItem>
+              <SelectItem value="Shahzaib Shams">Shahzaib Shams</SelectItem>
+              <SelectItem value="Aneeza Komal">Aneeza Komal</SelectItem>
+              <SelectItem value="Alvina Sami">Alvina Sami</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <Select
           value={followUpFilter}
           onValueChange={setFollowUpFilter}
