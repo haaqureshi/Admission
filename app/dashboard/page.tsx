@@ -32,20 +32,29 @@ export default function Dashboard() {
 
   const fetchLeads = useCallback(async () => {
     try {
+      console.log('Fetching leads...');
       const { data, error } = await supabase
         .from('leads')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
-        throw error;
+        console.error('Error fetching leads:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch leads: " + error.message,
+          variant: "destructive",
+        });
+        return;
       }
 
+      console.log('Leads fetched successfully:', data?.length || 0, 'leads');
       setLeads(data || []);
     } catch (error) {
+      console.error('Error in fetchLeads:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch leads",
+        description: "Failed to fetch leads. Please try refreshing the page.",
         variant: "destructive",
       });
     }
@@ -61,23 +70,28 @@ export default function Dashboard() {
     fetchLeads();
 
     const channel = supabase
-      .channel('leads_changes')
+      .channel('leads_db_changes')
       .on('postgres_changes', 
         { 
           event: '*', 
           schema: 'public', 
-          table: 'leads' 
+          table: 'leads',
+          filter: `id.gt.0` 
         }, 
-        () => {
-          refreshData();
+        (payload) => {
+          console.log('Change received!', payload);
+          fetchLeads();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Subscription status:', status);
+      });
 
     return () => {
+      console.log('Cleaning up Supabase subscription...');
       supabase.removeChannel(channel);
     };
-  }, [fetchLeads, refreshData]);
+  }, [fetchLeads]);
 
   // Auto-refresh setup
   useEffect(() => {
