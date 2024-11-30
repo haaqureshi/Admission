@@ -6,10 +6,11 @@ interface AssignmentState {
 }
 
 const teamMembers = [
-  "Alvina Sami",
+  "Abubakr Mahmood",
+  "Faizan Ullah",
   "Shahzaib Shams",
-  "Faiza Ullah",
-  "Aneeza Komal"
+  "Aneeza Komal",
+  "Alvina Sami"
 ];
 
 // Initialize state with localStorage if available, otherwise use default state
