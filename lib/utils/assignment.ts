@@ -31,13 +31,22 @@ const getInitialState = (): AssignmentState => {
 
 let assignmentState: AssignmentState = getInitialState();
 
+/**
+ * Returns the next assignee for a given program.
+ * 
+ * @param program The program for which to get the next assignee.
+ * @returns The next assignee for the given program.
+ */
 export function getNextAssignee(program: string): string {
   // Ensure program exists in state
   if (!(program in assignmentState)) {
     assignmentState[program as keyof AssignmentState] = 0;
   }
 
+  // Get current index for this program
   const currentIndex = assignmentState[program as keyof AssignmentState];
+  
+  // Get next assignee using the current index
   const nextAssignee = teamMembers[currentIndex % teamMembers.length];
   
   // Update state for this specific program
@@ -46,7 +55,7 @@ export function getNextAssignee(program: string): string {
     [program]: (currentIndex + 1) % teamMembers.length
   };
 
-  // Persist state if localStorage is available
+  // Persist state to localStorage
   if (typeof window !== 'undefined') {
     localStorage.setItem('assignmentState', JSON.stringify(assignmentState));
   }
