@@ -29,14 +29,59 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [userRole, setUserRole] = useState<string>("developer");
   const [activeTab, setActiveTab] = useState("leads");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [programFilter, setProgramFilter] = useState("all");
+  const [assigneeFilter, setAssigneeFilter] = useState("all");
+  const [followUpFilter, setFollowUpFilter] = useState("all");
 
-  const fetchLeads = useCallback(async () => {
+  const fetchLeads = useCallback(async (filters?: {
+    searchQuery?: string;
+    programFilter?: string;
+    assigneeFilter?: string;
+    followUpFilter?: string;
+  }) => {
     try {
-      console.log('Fetching leads...');
-      const { data, error } = await supabase
+      console.log('Fetching leads with filters:', filters);
+      let query = supabase
         .from('leads')
         .select('*')
         .order('created_at', { ascending: false });
+
+      // Apply filters to the query
+      if (filters) {
+        // Program Filter
+        if (filters.programFilter) {
+          if (filters.programFilter === 'default') {
+            console.log('Using default program filter - showing all programs');
+            // Don't apply any program filter
+          } else if (filters.programFilter === 'all') {
+            console.log('Resetting program filter - showing all programs');
+            // Don't apply any program filter
+          } else {
+            console.log('Filtering by program:', filters.programFilter);
+            query = query.eq('program', filters.programFilter.trim());
+          }
+        }
+
+        // Assignee Filter
+        if (filters.assigneeFilter === 'all') {
+          console.log('Resetting assignee filter');
+        } else if (filters.assigneeFilter) {
+          console.log('Applying assignee filter:', filters.assigneeFilter);
+          query = query.eq('Assign To', filters.assigneeFilter);
+        }
+
+        // Search Query
+        if (filters.searchQuery) {
+          const searchTerm = filters.searchQuery.toLowerCase().trim();
+          console.log('Applying search filter:', searchTerm);
+          query = query.or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%`);
+        }
+      }
+
+      // Execute query and log the SQL (if available)
+      console.log('Executing query...');
+      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching leads:', error);
@@ -48,7 +93,14 @@ export default function Dashboard() {
         return;
       }
 
-      console.log('Leads fetched successfully:', data?.length || 0, 'leads');
+      console.log('Query successful!');
+      console.log('Leads fetched:', data?.length || 0);
+      console.log('Current filters:', {
+        program: filters?.programFilter,
+        assignee: filters?.assigneeFilter,
+        search: filters?.searchQuery
+      });
+
       setLeads(data || []);
     } catch (error) {
       console.error('Error in fetchLeads:', error);
@@ -60,14 +112,24 @@ export default function Dashboard() {
     }
   }, [toast]);
 
+  const handleFilterChange = useCallback((filters: {
+    searchQuery?: string;
+    programFilter?: string;
+    assigneeFilter?: string;
+    followUpFilter?: string;
+  }) => {
+    console.log('Filter change triggered:', filters);
+    fetchLeads(filters);
+  }, [fetchLeads]);
+
   const refreshData = useCallback(() => {
     setRefreshKey(prev => prev + 1);
-    fetchLeads();
-  }, [fetchLeads]);
+    fetchLeads({ searchQuery, programFilter, assigneeFilter, followUpFilter });
+  }, [fetchLeads, searchQuery, programFilter, assigneeFilter, followUpFilter]);
 
   // Initial fetch and real-time updates setup
   useEffect(() => {
-    fetchLeads();
+    fetchLeads({ searchQuery, programFilter, assigneeFilter, followUpFilter });
 
     const channel = supabase
       .channel('leads_db_changes')
@@ -80,7 +142,7 @@ export default function Dashboard() {
         }, 
         (payload) => {
           console.log('Change received!', payload);
-          fetchLeads();
+          fetchLeads({ searchQuery, programFilter, assigneeFilter, followUpFilter });
         }
       )
       .subscribe((status) => {
@@ -91,7 +153,7 @@ export default function Dashboard() {
       console.log('Cleaning up Supabase subscription...');
       supabase.removeChannel(channel);
     };
-  }, [fetchLeads]);
+  }, [fetchLeads, searchQuery, programFilter, assigneeFilter, followUpFilter]);
 
   // Auto-refresh setup
   useEffect(() => {
@@ -149,7 +211,7 @@ export default function Dashboard() {
         throw error;
       }
 
-      fetchLeads(); // Re-fetch data after update
+      fetchLeads({ searchQuery, programFilter, assigneeFilter, followUpFilter }); // Re-fetch data after update
     } catch (error) {
       toast({
         title: "Update Error",
@@ -174,7 +236,12 @@ export default function Dashboard() {
             <div className="flex items-center space-x-4">
               <div className="relative w-64">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search..." className="pl-8" />
+                <Input 
+                  placeholder="Search..." 
+                  className="pl-8" 
+                  value={searchQuery} 
+                  onChange={(e) => setSearchQuery(e.target.value)} 
+                />
               </div>
               <Button onClick={() => setIsAddLeadOpen(true)}>
                 <UserPlus className="mr-2 h-4 w-4" />
@@ -235,79 +302,102 @@ export default function Dashboard() {
                       .from('leads')
                       .update({ status })
                       .eq('id', id);
-                    if (!error) refreshData();
+                    if (!error) {
+                      fetchLeads({ searchQuery, programFilter, assigneeFilter, followUpFilter });
+                    }
                   },
                   updatePulse: async (id: string, pulse: string) => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ pulse })
                       .eq('id', id);
-                    if (!error) refreshData();
+                    if (!error) {
+                      fetchLeads({ searchQuery, programFilter, assigneeFilter, followUpFilter });
+                    }
                   },
                   updateName: async (id: string, name: string) => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ name })
                       .eq('id', id);
-                    if (!error) refreshData();
+                    if (!error) {
+                      fetchLeads({ searchQuery, programFilter, assigneeFilter, followUpFilter });
+                    }
                   },
                   updatePhone: async (id: string, phone: string) => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ phone })
                       .eq('id', id);
-                    if (!error) refreshData();
+                    if (!error) {
+                      fetchLeads({ searchQuery, programFilter, assigneeFilter, followUpFilter });
+                    }
                   },
                   updateEmail: async (id: string, email: string) => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ email })
                       .eq('id', id);
-                    if (!error) refreshData();
+                    if (!error) {
+                      fetchLeads({ searchQuery, programFilter, assigneeFilter, followUpFilter });
+                    }
                   },
                   updateDob: async (id: string, dob: string) => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ dob })
                       .eq('id', id);
-                    if (!error) refreshData();
+                    if (!error) {
+                      fetchLeads({ searchQuery, programFilter, assigneeFilter, followUpFilter });
+                    }
                   },
                   updateEducation: async (id: string, education: string) => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ education })
                       .eq('id', id);
-                    if (!error) refreshData();
+                    if (!error) {
+                      fetchLeads({ searchQuery, programFilter, assigneeFilter, followUpFilter });
+                    }
                   },
                   updateSource: async (id: string, source: string) => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ source })
                       .eq('id', id);
-                    if (!error) refreshData();
+                    if (!error) {
+                      fetchLeads({ searchQuery, programFilter, assigneeFilter, followUpFilter });
+                    }
                   },
                   updateProgram: async (id: string, program: string) => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ program })
                       .eq('id', id);
-                    if (!error) refreshData();
+                    if (!error) {
+                      fetchLeads({ searchQuery, programFilter, assigneeFilter, followUpFilter });
+                    }
                   },
                   updateFollowUpDate: async (id: string, follow_up_date: string) => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ follow_up_date })
                       .eq('id', id);
-                    if (!error) refreshData();
+                    if (!error) {
+                      fetchLeads({ searchQuery, programFilter, assigneeFilter, followUpFilter });
+                    }
                   },
                   updateCommunication: async (id: string, communication: string) => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ communication })
                       .eq('id', id);
-                    if (!error) refreshData();
+                    if (!error) {
+                      fetchLeads({ searchQuery, programFilter, assigneeFilter, followUpFilter });
+                    }
                   }
                 }}
+                onFilterChange={handleFilterChange}
               />
             </Card>
           </TabsContent>

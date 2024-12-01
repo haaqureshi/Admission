@@ -50,6 +50,12 @@ interface DataTableProps<TData, TValue> {
     updateName?: (id: string, name: string) => Promise<void>;
     updateEmail?: (id: string, email: string) => Promise<void>;
   };
+  onFilterChange?: (filters: {
+    searchQuery: string;
+    programFilter: string;
+    assigneeFilter: string;
+    followUpFilter: string;
+  }) => void;
 }
 
 type Lead = {
@@ -67,20 +73,29 @@ export function DataTable<TData extends Lead, TValue>({
   columns,
   data,
   meta,
+  onFilterChange,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [followUpFilter, setFollowUpFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [programFilter, setProgramFilter] = useState("all");
+  const [programFilter, setProgramFilter] = useState("default");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
   const [pageSize] = useState(10);
   const [pageIndex, setPageIndex] = useState(0);
 
   useEffect(() => {
-    setColumnFilters([]);
-    setSorting([]);
-  }, [data]);
+    onFilterChange?.({
+      searchQuery,
+      programFilter,
+      assigneeFilter,
+      followUpFilter
+    });
+  }, [searchQuery, programFilter, assigneeFilter, followUpFilter, onFilterChange]);
+
+  useEffect(() => {
+    setPageIndex(0);
+  }, [searchQuery, programFilter, assigneeFilter, followUpFilter]);
 
   const filterFollowUps = (row: TData) => {
     const followUpDate = row.follow_up_date ? new Date(row.follow_up_date) : null;
@@ -114,7 +129,7 @@ export function DataTable<TData extends Lead, TValue>({
           return false;
         });
 
-      const programMatches = programFilter === "all" || row.program === programFilter;
+      const programMatches = programFilter === "default" || row.program === programFilter;
       const assigneeMatches = assigneeFilter === "all" || row["Assign To"] === assigneeFilter;
       const followUpMatches = filterFollowUps(row);
 
@@ -156,9 +171,95 @@ export function DataTable<TData extends Lead, TValue>({
         <Input
           placeholder="Search by name, email, or phone..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            onFilterChange?.({
+              searchQuery: e.target.value,
+              programFilter,
+              assigneeFilter,
+              followUpFilter
+            });
+          }}
           className="max-w-sm"
         />
+        
+        <Select 
+          value={programFilter} 
+          onValueChange={(value) => {
+            console.log('Program filter changed:', value);
+            setProgramFilter(value);
+            // Force immediate refetch
+            onFilterChange?.({
+              searchQuery,
+              programFilter: value,
+              assigneeFilter,
+              followUpFilter
+            });
+          }}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select Program" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="default">Program Filter</SelectItem>
+            <SelectItem value="Bar Transfer Course">Bar Transfer Course</SelectItem>
+            <SelectItem value="LLM Human Rights">LLM Human Rights</SelectItem>
+            <SelectItem value="LLB (Hons)">LLB (Hons)</SelectItem>
+            <SelectItem value="LLM Corporate">LLM Corporate</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select 
+          value={assigneeFilter} 
+          onValueChange={(value) => {
+            setAssigneeFilter(value);
+            onFilterChange?.({
+              searchQuery,
+              programFilter,
+              assigneeFilter: value,
+              followUpFilter
+            });
+          }}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select Assignee" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Assignee Filter</SelectItem>
+            <SelectItem value="Abubakr Mahmood">Abubakr Mahmood</SelectItem>
+            <SelectItem value="Faizan Ullah">Faizan Ullah</SelectItem>
+            <SelectItem value="Shahzaib Shams">Shahzaib Shams</SelectItem>
+            <SelectItem value="Aneeza Komal">Aneeza Komal</SelectItem>
+            <SelectItem value="Alvina Sami">Alvina Sami</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select 
+          value={followUpFilter} 
+          onValueChange={(value) => {
+            setFollowUpFilter(value);
+            onFilterChange?.({
+              searchQuery,
+              programFilter,
+              assigneeFilter,
+              followUpFilter: value
+            });
+          }}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Follow-up Date" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Follow-up Filter</SelectItem>
+            <SelectItem value="today">Today</SelectItem>
+            <SelectItem value="tomorrow">Tomorrow</SelectItem>
+            <SelectItem value="this-week">This Week</SelectItem>
+            <SelectItem value="overdue">Overdue</SelectItem>
+            <SelectItem value="upcoming">Upcoming</SelectItem>
+            <SelectItem value="not-set">Not Set</SelectItem>
+          </SelectContent>
+        </Select>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="w-[220px]">
@@ -185,56 +286,6 @@ export function DataTable<TData extends Lead, TValue>({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <Select
-          value={programFilter}
-          onValueChange={setProgramFilter}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="All Programs" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Programs</SelectItem>
-            <SelectItem value="LLB (Hons)">LLB (Hons)</SelectItem>
-            <SelectItem value="LLM Corporate">LLM Corporate</SelectItem>
-            <SelectItem value="LLM Human Rights">LLM Human Rights</SelectItem>
-            <SelectItem value="Bar Transfer Course">Bar Transfer Course</SelectItem>
-          </SelectContent>
-        </Select>
-        <div className="flex items-center gap-2">
-          <Select
-            value={assigneeFilter}
-            onValueChange={setAssigneeFilter}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by assignee" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Assignees</SelectItem>
-              <SelectItem value="Abubakr Mahmood">Abubakr Mahmood</SelectItem>
-              <SelectItem value="Faizan Ullah">Faizan Ullah</SelectItem>
-              <SelectItem value="Shahzaib Shams">Shahzaib Shams</SelectItem>
-              <SelectItem value="Aneeza Komal">Aneeza Komal</SelectItem>
-              <SelectItem value="Alvina Sami">Alvina Sami</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <Select
-          value={followUpFilter}
-          onValueChange={setFollowUpFilter}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Follow-up Date" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Follow-ups</SelectItem>
-            <SelectItem value="today">Today</SelectItem>
-            <SelectItem value="tomorrow">Tomorrow</SelectItem>
-            <SelectItem value="this-week">This Week</SelectItem>
-            <SelectItem value="overdue">Overdue</SelectItem>
-            <SelectItem value="upcoming">Upcoming</SelectItem>
-            <SelectItem value="not-set">Not Set</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
       <div className="rounded-md border">
         <Table>
