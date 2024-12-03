@@ -6,11 +6,11 @@ interface AssignmentState {
 }
 
 const teamMembers = [
-  "Abubakr Mahmood",
   "Faizan Ullah",
   "Shahzaib Shams",
   "Aneeza Komal",
-  "Alvina Sami"
+  "Alvina Sami",
+  "Abubakr Mahmood"
 ];
 
 const programs = [
