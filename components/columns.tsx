@@ -582,34 +582,40 @@ export const columns: ColumnDef<Lead>[] = [
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <div className="text-sm font-medium text-muted-foreground">Assigned To:</div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8">
-                      <Badge variant="outline" className="h-8">
-                        {lead["Assign To"] || "Unassigned"}
-                      </Badge>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Assign To</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => meta?.updateAssignee?.(row.original.id, "Abubakr Mahmood")}>
-                      Abubakr Mahmood
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => meta?.updateAssignee?.(row.original.id, "Faizan Ullah")}>
-                      Faizan Ullah
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => meta?.updateAssignee?.(row.original.id, "Shahzaib Shams")}>
-                      Shahzaib Shams
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => meta?.updateAssignee?.(row.original.id, "Aneeza Komal")}>
-                      Aneeza Komal
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => meta?.updateAssignee?.(row.original.id, "Alvina Sami")}>
-                      Alvina Sami
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                {meta?.userRole === "developer" ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8">
+                        <Badge variant="outline" className="h-8">
+                          {lead["Assign To"] || "Unassigned"}
+                        </Badge>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Assign To</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => meta?.updateAssignee?.(row.original.id, "Abubakr Mahmood")}>
+                        Abubakr Mahmood
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => meta?.updateAssignee?.(row.original.id, "Faizan Ullah")}>
+                        Faizan Ullah
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => meta?.updateAssignee?.(row.original.id, "Shahzaib Shams")}>
+                        Shahzaib Shams
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => meta?.updateAssignee?.(row.original.id, "Aneeza Komal")}>
+                        Aneeza Komal
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => meta?.updateAssignee?.(row.original.id, "Alvina Sami")}>
+                        Alvina Sami
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <Badge variant="outline" className="h-8">
+                    {lead["Assign To"] || "Unassigned"}
+                  </Badge>
+                )}
               </div>
               <div className="flex items-center justify-between">
                 <div className="text-sm font-medium text-muted-foreground">Created On:</div>

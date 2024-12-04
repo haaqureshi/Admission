@@ -9,30 +9,32 @@ import { useToast } from "@/hooks/use-toast";
 interface AuthContextType {
   user: User | null;
   session: Session | null;
+  userRole: string | null;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const ALLOWED_DOMAINS = ['bsol-admission.netlify.app', 'admission.blackstoneboard.com'];
+const ALLOWED_DOMAINS = ['bsol-admission.netlify.app', 'admission.blackstoneboard.com', 'localhost'];
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
 
   const checkTeamMembership = async (email: string) => {
-    const { data: teamMembers, error } = await supabase
+    const { data: teamMember, error } = await supabase
       .from('admission_team')
-      .select('email')
+      .select('email, role')
       .eq('email', email)
       .single();
 
-    if (error || !teamMembers) {
+    if (error || !teamMember) {
       await supabase.auth.signOut();
       toast({
         title: "Access Denied",
@@ -42,6 +44,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       router.push('/login');
       return false;
     }
+    
+    setUserRole(teamMember.role || null);
     return true;
   };
 
@@ -126,6 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = {
     user,
     session,
+    userRole,
     signInWithGoogle,
     signOut,
   };

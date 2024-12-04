@@ -32,6 +32,7 @@ import { useState, useMemo, useEffect } from "react";
 import { format, isToday, isTomorrow, isThisWeek, isAfter, isBefore, startOfToday } from "date-fns";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Calendar, ArrowUpDown, ArrowDown, ArrowUp, X } from "lucide-react";
+import { useAuth } from "@/lib/auth"; // Assuming useAuth hook is defined in this file
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -75,6 +76,7 @@ export function DataTable<TData extends Lead, TValue>({
   meta,
   onFilterChange,
 }: DataTableProps<TData, TValue>) {
+  const { userRole } = useAuth();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [followUpFilter, setFollowUpFilter] = useState<string>("all");
@@ -154,7 +156,10 @@ export function DataTable<TData extends Lead, TValue>({
         pageIndex,
       },
     },
-    meta,
+    meta: {
+      ...meta,
+      userRole,
+    },
   });
 
   useEffect(() => {

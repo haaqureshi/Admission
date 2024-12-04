@@ -297,11 +297,21 @@ export default function Dashboard() {
                 columns={columns} 
                 data={filteredLeads}
                 meta={{
+                  updateAssignee: async (id: string, assignTo: string) => {
+                    const { error } = await supabase
+                      .from('leads')
+                      .update({ "Assign To": assignTo })
+                      .eq('id', id);
+                    if (!error) {
+                      fetchLeads({ searchQuery, programFilter, assigneeFilter, followUpFilter });
+                    }
+                  },
                   updateStatus: async (id: string, status: string) => {
                     const { error } = await supabase
                       .from('leads')
                       .update({ status })
                       .eq('id', id);
+
                     if (!error) {
                       fetchLeads({ searchQuery, programFilter, assigneeFilter, followUpFilter });
                     }
