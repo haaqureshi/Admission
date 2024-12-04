@@ -89,7 +89,7 @@ export function DataTable<TData extends Lead, TValue>({
   useEffect(() => {
     onFilterChange?.({
       searchQuery,
-      programFilter,
+      programFilter: programFilter === "default" ? "all" : programFilter,
       assigneeFilter,
       followUpFilter
     });

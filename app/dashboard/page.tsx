@@ -50,17 +50,11 @@ export default function Dashboard() {
       // Apply filters to the query
       if (filters) {
         // Program Filter
-        if (filters.programFilter) {
-          if (filters.programFilter === 'default') {
-            console.log('Using default program filter - showing all programs');
-            // Don't apply any program filter
-          } else if (filters.programFilter === 'all') {
-            console.log('Resetting program filter - showing all programs');
-            // Don't apply any program filter
-          } else {
-            console.log('Filtering by program:', filters.programFilter);
-            query = query.eq('program', filters.programFilter.trim());
-          }
+        if (filters.programFilter && filters.programFilter !== 'all') {
+          console.log('Filtering by program:', filters.programFilter);
+          query = query.eq('program', filters.programFilter.trim());
+        } else {
+          console.log('No program filter applied - showing all programs');
         }
 
         // Assignee Filter
