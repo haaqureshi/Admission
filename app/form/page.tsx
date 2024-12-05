@@ -1,3 +1,4 @@
+// This is the main admission form component that handles user input and validation
 "use client";
 
 import { useState } from "react";
