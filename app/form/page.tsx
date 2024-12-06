@@ -32,15 +32,28 @@ import { CalendarIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getNextAssignee } from "@/lib/utils/assignment";
 
-const phoneRegex = /^(\+\d{1,3}[-.]?)?\d{10,14}$/;
+
+const phoneRegex = /^(?:\+[1-9]\d{0,3}[-. ]?\d{1,14}|03\d{9})$/;
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100, "Name must not exceed 100 characters"),
   dob: z.string().min(1, "Date of birth is required"),
   phone: z.string()
-    .min(10, "Phone number must be at least 10 digits")
-    .max(15, "Phone number must not exceed 15 digits")
-    .regex(phoneRegex, "Please enter a valid phone number (e.g., +923001234567 or 03001234567)"),
+    .min(8, "Phone number must be at least 8 digits")
+    .max(20, "Phone number must not exceed 20 characters including formatting")
+    .regex(phoneRegex, "Please enter a valid phone number. For Pakistani numbers, use exactly 11 digits starting with 03 (e.g., 03001234567)")
+    .refine((val) => !val.includes('@'), "Phone number cannot contain @ symbol")
+    .refine((val) => !/[a-zA-Z]/.test(val), "Phone number cannot contain letters")
+    .refine(
+      (val) => {
+        const digitsOnly = val.replace(/[-. ]/g, '');
+        if (digitsOnly.startsWith('03')) {
+          return digitsOnly.length === 11;
+        }
+        return digitsOnly.length >= 8 && digitsOnly.length <= 15;
+      },
+      "Pakistani numbers (starting with 03) must be exactly 11 digits"
+    ),
   education: z.string().min(1, "Education level is required"),
   email: z.string().email("Invalid email address").min(1, "Email is required"),
   source: z.string().min(1, "Source is required"),
@@ -107,7 +120,7 @@ export default function PublicForm() {
         }
       }
 
-      const assignTo = getNextAssignee(values.program);
+      const assignTo = await getNextAssignee(values.program);
       const leadData = {
         ...values,
         status: "No Contact",
@@ -117,7 +130,7 @@ export default function PublicForm() {
       const { error } = await supabase
         .from('leads')
         .insert([leadData]);
-
+ 
       if (error) throw error;
 
       toast({
@@ -224,6 +237,8 @@ export default function PublicForm() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
+                        <SelectItem value="O/A Levels">O/A Levels</SelectItem>
+                        <SelectItem value="Matric/F.Sc">Matric/F.Sc</SelectItem>
                         <SelectItem value="Bachelors">Bachelors</SelectItem>
                         <SelectItem value="Masters">Masters</SelectItem>
                         <SelectItem value="PhD">PhD</SelectItem>

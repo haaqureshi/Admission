@@ -121,6 +121,40 @@ export default function Dashboard() {
     fetchLeads({ searchQuery, programFilter, assigneeFilter, followUpFilter });
   }, [fetchLeads, searchQuery, programFilter, assigneeFilter, followUpFilter]);
 
+  const handleUpdate = async (id: string, field: keyof Lead, value: any) => {
+    try {
+      // Update only the specific lead
+      const { error } = await supabase
+        .from('leads')
+        .update({ [field]: value })
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      // Update only the specific lead in the local state
+      setLeads(currentLeads => 
+        currentLeads.map(lead => 
+          lead.id === id ? { ...lead, [field]: value } : lead
+        )
+      );
+
+      toast({
+        title: "Updated Successfully",
+        description: `Lead ${field} has been updated.`,
+      });
+
+    } catch (error) {
+      console.error('Error updating lead:', error);
+      toast({
+        title: "Update Failed",
+        description: "Failed to update lead. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Initial fetch and real-time updates setup
   useEffect(() => {
     fetchLeads({ searchQuery, programFilter, assigneeFilter, followUpFilter });
@@ -129,22 +163,24 @@ export default function Dashboard() {
       .channel('leads_db_changes')
       .on('postgres_changes', 
         { 
-          event: '*', 
+          event: 'UPDATE', 
           schema: 'public', 
-          table: 'leads',
-          filter: `id.gt.0` 
+          table: 'leads'
         }, 
         (payload) => {
-          console.log('Change received!', payload);
-          fetchLeads({ searchQuery, programFilter, assigneeFilter, followUpFilter });
+          if (payload.new && payload.new.id) {
+            // Only update the specific lead that changed
+            setLeads(currentLeads => 
+              currentLeads.map(lead => 
+                lead.id === payload.new.id ? { ...lead, ...payload.new as Lead } : lead
+              )
+            );
+          }
         }
       )
-      .subscribe((status) => {
-        console.log('Subscription status:', status);
-      });
+      .subscribe();
 
     return () => {
-      console.log('Cleaning up Supabase subscription...');
       supabase.removeChannel(channel);
     };
   }, [fetchLeads, searchQuery, programFilter, assigneeFilter, followUpFilter]);
@@ -193,27 +229,6 @@ export default function Dashboard() {
   const filteredLeads = selectedStatus && selectedStatus !== "All"
     ? leads.filter(lead => lead.status === selectedStatus)
     : leads;
-
-  const handleUpdate = async (id: string, field: string, value: any) => {
-    try {
-      const { error } = await supabase
-        .from('leads')
-        .update({ [field]: value })
-        .eq('id', id);
-
-      if (error) {
-        throw error;
-      }
-
-      fetchLeads({ searchQuery, programFilter, assigneeFilter, followUpFilter }); // Re-fetch data after update
-    } catch (error) {
-      toast({
-        title: "Update Error",
-        description: "Failed to update lead.",
-        variant: "destructive",
-      });
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
